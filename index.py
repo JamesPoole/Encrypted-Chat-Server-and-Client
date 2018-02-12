@@ -16,6 +16,7 @@ def home():
 @socketio.on('message')
 def showMessage(message):
     print('Received message: ' + str(message))
+    emit('user_message', {'message': 'YESS - ' + str(message)})
 
 # When someone connects
 @socketio.on('connect')

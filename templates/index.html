@@ -11,10 +11,17 @@
 	<script type="text/javascript" charset="utf-8">
 		var socket = io.connect('http://' + document.domain + ':' + location.port);
 		socket.on('connect', function() {
-			socket.emit('message', {
-				message: 'I\'m connected!'
-			});
+			socket.emit('message', 'I\'m connected!');
 		});
+		socket.on('user_message', (data) => {
+			console.log(data);
+			var messagesDiv = document.getElementById('lines');
+			messagesDiv.innerHTML += data.message + "<p></p>";
+		});
+
+		function sendMessage() {
+			socket.emit('message', 'I\'m connected!');
+		};
 	</script>
 
 	<!--Let browser know website is optimized for mobile-->
@@ -23,7 +30,16 @@
 </head>
 
 <body>
-	<h3>Project Time</h3>
+	<h2>Project Time</h2>
+	<div class="chat">
+		<h3> Messages </h3>
+		<div id="messages">
+			<div id="nicknames"></div>
+			<div id="lines"></div>
+		</div>
+		<button onclick="sendMessage()">Click me</button>
+	</div>
+
 	<script type="text/javascript" src="static/js/materialize.min.js"></script>
 </body>
 
