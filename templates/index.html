@@ -18,23 +18,23 @@
 			<a href="#" data-target="nav-mobile" class="sidenav-trigger"><i class="material-icons">menu</i></a>
 		</div>
 	</nav>
-		<div class="chat row">
-			<h3 style="margin-left:5px"> Messages </h3>
-			<div id="messages" style="margin-left:5px">
-				<div id="nicknames"></div>
-				<div id="lines"></div>
-			</div>
+	<div class="chat row">
+		<h3 style="margin-left:5px"> Messages </h3>
+		<div id="messages" style="margin-left:5px; overflow:auto;">
+			<div id="lines"></div>
 		</div>
-		<form action="" onsubmit="return sendMessage()">
-			<div class="row" style="position: fixed; bottom: 0; width: 100%">
-				<div class="input-field col s11">
-					<input placeholder="Write a message..." id="m" type="text" class="validate">
-				</div>
-				<button class="btn waves-effect waves-light purple" type="submit" name="action" style="margin-top:20px;">Submit
+	</div>
+	<form action="" onsubmit="return sendMessage()">
+		<div class="row" style="position: fixed; bottom: 0; width: 100%;">
+			<div class="input-field col s11" style=" display:flex;">
+				<input placeholder="Nickname" id="nick" type="text" class="validate" style=" max-width: 20%; border-right-style: solid; border-color: #9e9e9e; ">
+				<input placeholder="Write a message..." id="m" type="text" class="validate" style="padding-left: 10px;">
+			</div>
+			<button class="btn waves-effect waves-light purple" type="submit" name="action" style="margin-top:20px;">Submit
 					<i class="material-icons right">send</i>
 				</button>
-			</div>
-		</form>
+		</div>
+	</form>
 	<script type="text/javascript" src="static/js/materialize.min.js"></script>
 	<script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/socket.io/1.3.6/socket.io.min.js"></script>
 	<script type="text/javascript" charset="utf-8">
@@ -45,11 +45,11 @@
 		socket.on('user_message', (data) => {
 			console.log(data);
 			var messagesDiv = document.getElementById('lines');
-			messagesDiv.innerHTML += data.message + "<p></p>";
+			messagesDiv.innerHTML += String(data.message) + "<p></p>";
 		});
 
 		function sendMessage() {
-			socket.emit('message', document.getElementById('m').value);
+			socket.emit('message', document.getElementById('nick').value + " - " + document.getElementById('m').value);
 			document.getElementById('m').value = ''
 			return false;
 		};

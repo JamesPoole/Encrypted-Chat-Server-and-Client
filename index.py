@@ -15,8 +15,8 @@ def home():
 # Show message received
 @socketio.on('message')
 def showMessage(message):
-    print('Received message: ' + str(message))
-    emit('user_message', {'message': 'YESS - ' + str(message)})
+    # put encryption stuff here before sending message
+    emit('user_message', {'message': str(message)}, broadcast = True)
 
 # When someone connects
 @socketio.on('connect')
