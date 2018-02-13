@@ -40,7 +40,7 @@
 	<script type="text/javascript" charset="utf-8">
 		var socket = io.connect('http://' + document.domain + ':' + location.port);
 		socket.on('connect', function() {
-			socket.emit('message', 'I\'m connected!');
+			socket.emit('message', 'New user connected!');
 		});
 		socket.on('user_message', (data) => {
 			console.log(data);
