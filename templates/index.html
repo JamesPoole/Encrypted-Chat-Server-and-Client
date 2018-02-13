@@ -13,24 +13,28 @@
 </head>
 
 <body>
-	<h2>Project Time</h2>
-	<div class="chat">
-		<h3> Messages </h3>
-		<div id="messages">
-			<div id="nicknames"></div>
-			<div id="lines"></div>
+	<nav class="purple lighten-1" role="navigation">
+		<div class="nav-wrapper row" style="margin-left:5px"><a id="logo-container" href="#" class="brand-logo">EncrypChat</a>
+			<a href="#" data-target="nav-mobile" class="sidenav-trigger"><i class="material-icons">menu</i></a>
 		</div>
-	</div>
-	<form action="" onsubmit="return sendMessage()">
-		<div class="row" style="position: fixed; bottom: 0; width: 100%">
-			<div class="input-field col s11">
-				<input placeholder="Write a message..." id="m" type="text" class="validate">
+	</nav>
+		<div class="chat row">
+			<h3 style="margin-left:5px"> Messages </h3>
+			<div id="messages" style="margin-left:5px">
+				<div id="nicknames"></div>
+				<div id="lines"></div>
 			</div>
-			<button class="btn waves-effect waves-light" type="submit" name="action" style="margin-top:20px;">Submit
-				<i class="material-icons right">send</i>
-			</button>
 		</div>
-	</form>
+		<form action="" onsubmit="return sendMessage()">
+			<div class="row" style="position: fixed; bottom: 0; width: 100%">
+				<div class="input-field col s11">
+					<input placeholder="Write a message..." id="m" type="text" class="validate">
+				</div>
+				<button class="btn waves-effect waves-light purple" type="submit" name="action" style="margin-top:20px;">Submit
+					<i class="material-icons right">send</i>
+				</button>
+			</div>
+		</form>
 	<script type="text/javascript" src="static/js/materialize.min.js"></script>
 	<script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/socket.io/1.3.6/socket.io.min.js"></script>
 	<script type="text/javascript" charset="utf-8">
