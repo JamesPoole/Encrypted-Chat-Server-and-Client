@@ -34,33 +34,11 @@ function generateAES() {
     .then(function(key) {
       //returns a key object
       //console.log(key);
-      // var exportedKey = exportAES(key);
-      // var buffer = new ArrayBuffer(100);
-      //console.log(buffer);
-      // var encryptedData = AESEncrypt(key, buffer);
-      //console.log(encryptedData[0]);
-      //AESDecrypt(key, encryptedData[0], encryptedData[1]);
-      // return exportedKey;
       return key;
     })
     .catch(function(err) {
       console.error(err);
     });
-}
-
-function exportAES(key) {
-  var result = window.crypto.subtle.exportKey(
-      "jwk", //can be "jwk" or "raw"
-      key //extractable must be true
-    )
-    .then(function(keydata) {
-      //returns the exported key data
-      // console.log(keydata);
-    })
-    .catch(function(err) {
-      console.error(err);
-    });
-  return result;
 }
 
 function AESEncrypt(key, data) {
@@ -85,8 +63,6 @@ function AESEncrypt(key, data) {
     .then(function(encrypted) {
       //returns an ArrayBuffer containing the encrypted data
       var data = new Uint8Array(encrypted);
-      // console.log(data);
-      // AESDecrypt(key, data, generatedIv);
       return [key, data, generatedIv];
     })
     .catch(function(err) {
@@ -107,7 +83,6 @@ function AESDecrypt(key, data, generatedIv) {
     .then(function(decrypted) {
       //returns an ArrayBuffer containing the decrypted data
       var data = new Uint8Array(decrypted);
-      // console.log(data);
       return data
     })
     .catch(function(err) {
@@ -115,18 +90,16 @@ function AESDecrypt(key, data, generatedIv) {
     });
 }
 
-// generateRSA();
-//generateAES();
-// var key = generateAES();
+
 var AESKey;
 generateAES().then((res) => {
   AESKey = res;
   console.log(AESKey);
-  var exportedKey = exportAES(AESKey);
   var buffer = new ArrayBuffer(100);
+  console.log(buffer);
 
   AESEncrypt(AESKey, buffer).then((res) => {
-    var AESKey = res[0];
+    AESKey = res[0];
     var encryptedData = res[1];
     var generatedIv = res[2];
     console.log(encryptedData);
@@ -137,4 +110,3 @@ generateAES().then((res) => {
     });
   });
 });
-// AESEncrypt(key, "BALLS");
