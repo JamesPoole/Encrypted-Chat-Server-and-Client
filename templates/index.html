@@ -26,15 +26,20 @@
 	</div>
 	<form action="" onsubmit="return sendMessage()">
 		<div class="row" style="position: fixed; bottom: 0; width: 100%;">
-			<div class="input-field col s11" style=" display:flex;">
-				<input placeholder="Nickname" id="nick" type="text" class="validate" style=" max-width: 20%; border-right-style: solid; border-color: #9e9e9e; ">
+			<div class="input-field col s2">
+				<input placeholder="Nickname" id="nick" type="text" class="validate">
+			</div>
+			<div class="input-field col s6" style=" display:flex;">
 				<input placeholder="Write a message..." id="m" type="text" class="validate" style="padding-left: 10px;">
 			</div>
-			<button class="btn waves-effect waves-light purple" type="submit" name="action" style="margin-top:20px;">Submit
+			<div class="col s1">
+				<button class="btn waves-effect waves-light purple" type="submit" name="action" style="margin-top:20px;">Submit
 					<i class="material-icons right">send</i>
 				</button>
+			</div>
+		</form>
 		</div>
-	</form>
+
 	<script type="text/javascript" src="static/js/materialize.min.js"></script>
 	<script type="text/javascript" src="static/js/EncrypChat.js"></script>
 	<script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/socket.io/1.3.6/socket.io.min.js"></script>
