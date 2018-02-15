@@ -24,7 +24,7 @@ function generateRSA() {
 
 // Generate AES Key
 function generateAES() {
-  window.crypto.subtle.generateKey({
+  return window.crypto.subtle.generateKey({
         name: "AES-GCM",
         length: 256, //can be  128, 192, or 256
       },
@@ -34,13 +34,14 @@ function generateAES() {
     .then(function(key) {
       //returns a key object
       //console.log(key);
-      var exportedKey = exportAES(key);
-      var buffer = new ArrayBuffer(100);
+      // var exportedKey = exportAES(key);
+      // var buffer = new ArrayBuffer(100);
       //console.log(buffer);
-      var encryptedData = AESEncrypt(key, buffer);
+      // var encryptedData = AESEncrypt(key, buffer);
       //console.log(encryptedData[0]);
       //AESDecrypt(key, encryptedData[0], encryptedData[1]);
-      return exportedKey;
+      // return exportedKey;
+      return key;
     })
     .catch(function(err) {
       console.error(err);
@@ -54,7 +55,7 @@ function exportAES(key) {
     )
     .then(function(keydata) {
       //returns the exported key data
-      console.log(keydata);
+      // console.log(keydata);
     })
     .catch(function(err) {
       console.error(err);
@@ -64,7 +65,7 @@ function exportAES(key) {
 
 function AESEncrypt(key, data) {
   var generatedIv = window.crypto.getRandomValues(new Uint8Array(12))
-  var result = window.crypto.subtle.encrypt({
+  return window.crypto.subtle.encrypt({
         name: "AES-GCM",
 
         //Don't re-use initialization vectors!
@@ -84,9 +85,9 @@ function AESEncrypt(key, data) {
     .then(function(encrypted) {
       //returns an ArrayBuffer containing the encrypted data
       var data = new Uint8Array(encrypted);
-      console.log(data);
-      AESDecrypt(key, data, generatedIv);
-      return [data, generatedIv];
+      // console.log(data);
+      // AESDecrypt(key, data, generatedIv);
+      return [key, data, generatedIv];
     })
     .catch(function(err) {
       console.error(err);
@@ -94,7 +95,7 @@ function AESEncrypt(key, data) {
 }
 
 function AESDecrypt(key, data, generatedIv) {
-  window.crypto.subtle.decrypt({
+  return window.crypto.subtle.decrypt({
         name: "AES-GCM",
         iv: generatedIv, //The initialization vector you used to encrypt
         //additionalData: ArrayBuffer, //The addtionalData you used to encrypt (if any)
@@ -105,7 +106,9 @@ function AESDecrypt(key, data, generatedIv) {
     )
     .then(function(decrypted) {
       //returns an ArrayBuffer containing the decrypted data
-      console.log(new Uint8Array(decrypted));
+      var data = new Uint8Array(decrypted);
+      // console.log(data);
+      return data
     })
     .catch(function(err) {
       console.error(err);
@@ -114,6 +117,24 @@ function AESDecrypt(key, data, generatedIv) {
 
 // generateRSA();
 //generateAES();
-var key = generateAES();
-console.log(key);
+// var key = generateAES();
+var AESKey;
+generateAES().then((res) => {
+  AESKey = res;
+  console.log(AESKey);
+  var exportedKey = exportAES(AESKey);
+  var buffer = new ArrayBuffer(100);
+
+  AESEncrypt(AESKey, buffer).then((res) => {
+    var AESKey = res[0];
+    var encryptedData = res[1];
+    var generatedIv = res[2];
+    console.log(encryptedData);
+
+    AESDecrypt(AESKey, encryptedData, generatedIv).then((res) => {
+      var data = res;
+      console.log(data);
+    });
+  });
+});
 // AESEncrypt(key, "BALLS");
