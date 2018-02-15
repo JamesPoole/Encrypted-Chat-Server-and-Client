@@ -42,6 +42,11 @@
 		var socket = io.connect('http://' + document.domain + ':' + location.port);
 		socket.on('connect', function() {
 			socket.emit('message', 'New user connected!');
+			generateRSA().then((key) => {
+			    rsaPublicKey = key.publicKey;
+			    rsaPrivateKey = key.privateKey;
+					socket.emit('rsa_gen', rsaPublicKey);
+			});
 		});
 		socket.on('user_message', (data) => {
 			console.log(data);

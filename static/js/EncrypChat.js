@@ -1,6 +1,6 @@
 // Generate The RSA keypair
 function generateRSA() {
-  window.crypto.subtle.generateKey({
+  return window.crypto.subtle.generateKey({
         name: "RSA-PSS",
         modulusLength: 2048, //can be 1024, 2048, or 4096
         publicExponent: new Uint8Array([0x01, 0x00, 0x01]),
@@ -16,10 +16,50 @@ function generateRSA() {
       console.log(key);
       console.log(key.publicKey);
       console.log(key.privateKey);
+      return key;
     })
     .catch(function(err) {
       console.error(err);
     });
+}
+
+// RSA Sign
+function signRSA() {
+  return window.crypto.subtle.sign(
+      {
+          name: "RSA-PSS",
+          saltLength: 128, //the length of the salt
+      },
+      privateKey, //from generateKey or importKey above
+      data //ArrayBuffer of data you want to sign
+  )
+  .then(function(signature){
+      //returns an ArrayBuffer containing the signature
+      console.log(new Uint8Array(signature));
+  })
+  .catch(function(err){
+      console.error(err);
+  });
+}
+
+// RSA verify
+function verifyRSA() {
+  return window.crypto.subtle.verify(
+      {
+          name: "RSA-PSS",
+          saltLength: 128, //the length of the salt
+      },
+      publicKey, //from generateKey or importKey above
+      signature, //ArrayBuffer of the signature
+      data //ArrayBuffer of the data
+  )
+  .then(function(isvalid){
+      //returns a boolean on whether the signature is true or not
+      console.log(isvalid);
+  })
+  .catch(function(err){
+      console.error(err);
+  });
 }
 
 // Generate AES Key
@@ -90,21 +130,32 @@ function AESDecrypt(key, data, generatedIv) {
     });
 }
 
+//RSA
+var rsaPublicKey;
+var rsaPrivateKey;
+generateRSA().then((key) => {
+    rsaPublicKey = key.publicKey;
+    rsaPrivateKey = key.privateKey;
 
-var AESKey;
+    console.log(rsaPublicKey);
+    console.log(rsaPrivateKey);
+});
+
+//AES
+var aesKey;
 generateAES().then((res) => {
-  AESKey = res;
-  console.log(AESKey);
+  aesKey = res;
+  console.log(aesKey);
   var buffer = new ArrayBuffer(100);
   console.log(buffer);
 
-  AESEncrypt(AESKey, buffer).then((res) => {
-    AESKey = res[0];
+  AESEncrypt(aesKey, buffer).then((res) => {
+    aesKey = res[0];
     var encryptedData = res[1];
     var generatedIv = res[2];
     console.log(encryptedData);
 
-    AESDecrypt(AESKey, encryptedData, generatedIv).then((res) => {
+    AESDecrypt(aesKey, encryptedData, generatedIv).then((res) => {
       var data = res;
       console.log(data);
     });
