@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<html>
+
+<head>
+	<!--Import Google Icon Font-->
+	<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+	<!--Import materialize.css-->
+	<link type="text/css" rel="stylesheet" href="/materialize/css/materialize.min.css" media="screen,projection" />
+	<!--Let browser know website is optimized for mobile-->
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<title>EncrypChat</title>
+</head>
+
+<body>
+	<nav class="purple lighten-1" role="navigation">
+		<div class="nav-wrapper row" style="margin-left:5px"><a id="logo-container" href="#" class="brand-logo">EncrypChat</a>
+			<a href="#" data-target="nav-mobile" class="sidenav-trigger"><i class="material-icons">menu</i></a>
+		</div>
+	</nav>
+	<div class="chat row">
+		<h3 style="margin-left:5px"> Messages </h3>
+		<div id="messages" style="margin-left:5px; overflow:auto;">
+			<div id="lines"></div>
+		</div>
+	</div>
+	<form action="">
+		<div class="row" style="position: fixed; bottom: 0; width: 100%;">
+			<div class="input-field col s2">
+				<input placeholder="Nickname" id="nick" type="text" class="validate">
+			</div>
+			<div class="input-field col s6" style=" display:flex;">
+				<input placeholder="Write a message..." id="m" type="text" class="validate" style="padding-left: 10px;">
+			</div>
+			<div class="col s1">
+				<button class="btn waves-effect waves-light purple" type="submit" name="action" style="margin-top:20px;">Submit
+					<i class="material-icons right">send</i>
+				</button>
+			</div>
+		</form>
+		</div>
+
+	<script type="text/javascript" src="materialize/js/materialize.min.js"></script>
+	<script type="text/javascript" src="/js/EncrypChat.js"></script>
+	<script src="/socket.io/socket.io.js"></script>
+	<script src="https://code.jquery.com/jquery-1.11.1.js"></script>
+	<script>
+		$(function () {
+			var socket = io();
+			$('form').submit(function(){
+      	socket.emit('chat message', $('#nick').val() + " - " + $('#m').val());
+      	$('#m').val('');
+      	return false;
+    	});
+			socket.on('chat message', function(msg){
+				console.log(msg);
+				$('#messages').append($('<li>').text(msg));
+    	});
+		});
+
+
+		/*var socket = io.connect('http://' + document.domain + ':' + location.port);
+		socket.on('connect', function() {
+			socket.emit('message', 'New user connected!');
+		});
+		socket.on('user_message', (data) => {
+			console.log(data);
+			var messagesDiv = document.getElementById('lines');
+			messagesDiv.innerHTML += String(data.message) + "<p></p>";
+		});
+
+		function sendMessage() {
+			socket.emit('message', document.getElementById('nick').value + " - " + document.getElementById('m').value);
+			document.getElementById('m').value = ''
+			return false;
+		};*/
+	</script>
+</body>
+
+</html>
