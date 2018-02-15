@@ -27,3 +27,7 @@ def test_connect():
 @socketio.on('disconnect')
 def test_disconnect():
     print('Client disconnected')
+
+@socketio.on('rsa_gen')
+def generate_rsa(publicKey):
+    print(str(publicKey))
