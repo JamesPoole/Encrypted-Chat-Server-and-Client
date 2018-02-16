@@ -9,9 +9,9 @@
 	<link type="text/css" rel="stylesheet" href="/materialize/css/materialize.min.css" media="screen,projection" />
 	<!--Let browser know website is optimized for mobile-->
 	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
-<meta name="msapplication-TileColor" content="#da532c">
-<meta name="theme-color" content="#ffffff">
+	<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+	<meta name="msapplication-TileColor" content="#da532c">
+	<meta name="theme-color" content="#ffffff">
 	<title>EncrypChat</title>
 </head>
 
@@ -27,7 +27,7 @@
 			<div id="lines"></div>
 		</div>
 	</div>
-	<form action="">
+	<form action="" id="chatBox">
 		<div class="row" style="position: fixed; bottom: 0; width: 100%;">
 			<div class="input-field col s2">
 				<input placeholder="Nickname" id="nick" type="text" class="validate">
@@ -40,43 +40,59 @@
 					<i class="material-icons right">send</i>
 				</button>
 			</div>
-		</form>
-		</div>
+			<div class="switch col s4">
+				<label>
+					Chat
+					<input type="checkbox" id="encryptChat">
+					<span class="lever"></span>
+					Encrypt Chat
+				</label>
+			</div>
+	</form>
+	</button>
+	</div>
 
 	<script type="text/javascript" src="materialize/js/materialize.min.js"></script>
-	<script type="text/javascript" src="/js/EncrypChat.js"></script>
 	<script src="/socket.io/socket.io.js"></script>
 	<script src="https://code.jquery.com/jquery-1.11.1.js"></script>
+	<script type="text/javascript" src="/js/EncrypChat.js"></script>
 	<script>
-		$(function () {
+		$(function() {
 			var socket = io();
-			$('form').submit(function(){
-      	socket.emit('chat message', $('#nick').val() + " - " + $('#m').val());
-      	$('#m').val('');
-      	return false;
-    	});
-			socket.on('chat message', function(msg){
-				console.log(msg);
+			// print not encrypted
+			socket.on('normalMessage', function(msg) {
+				if ($('#encryptChat').is(":checked") == true) {
+					$('#encryptChat').click(); // ensure the encrypted button is in sync
+				}
 				$('#messages').append($('<li>').text(msg));
-    	});
-		});
+			});
 
+			// print Encrypted Message
+			socket.on('encryptedMessage', function(msg) {
+				if ($('#encryptChat').is(":checked") == false) {
+					$('#encryptChat').click(); // ensure the encrypted button is in sync
+				}
+				$('#messages').append($('<li>').text('SECURE -> ' + msg));
+			});
 
-		/*var socket = io.connect('http://' + document.domain + ':' + location.port);
-		socket.on('connect', function() {
-			socket.emit('message', 'New user connected!');
-		});
-		socket.on('user_message', (data) => {
-			console.log(data);
-			var messagesDiv = document.getElementById('lines');
-			messagesDiv.innerHTML += String(data.message) + "<p></p>";
-		});
+			// Get message and decide if it should be encrypted or not
+			$('#chatBox').submit(function() {
+				if ($('#encryptChat').is(":checked")) {
+					socket.emit('encryptProtocol', "Start chat encryption");
+					socket.emit('encryptedMessage', $('#nick').val() + " - " + $('#m').val());
+				} else {
+					socket.emit('normalMessage', $('#nick').val() + " - " + $('#m').val());
+				}
+				$('#m').val('');
+				return false;
+			});
 
-		function sendMessage() {
-			socket.emit('message', document.getElementById('nick').value + " - " + document.getElementById('m').value);
-			document.getElementById('m').value = ''
-			return false;
-		};*/
+			// protocol
+			// First step
+			socket.on('getResponse1', function(msg) {
+				// first
+			});
+		});
 	</script>
 </body>
 

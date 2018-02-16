@@ -25,41 +25,39 @@ function generateRSA() {
 
 // RSA Sign
 function signRSA() {
-  return window.crypto.subtle.sign(
-      {
-          name: "RSA-PSS",
-          saltLength: 128, //the length of the salt
+  return window.crypto.subtle.sign({
+        name: "RSA-PSS",
+        saltLength: 128, //the length of the salt
       },
       privateKey, //from generateKey or importKey above
       data //ArrayBuffer of data you want to sign
-  )
-  .then(function(signature){
+    )
+    .then(function(signature) {
       //returns an ArrayBuffer containing the signature
       console.log(new Uint8Array(signature));
-  })
-  .catch(function(err){
+    })
+    .catch(function(err) {
       console.error(err);
-  });
+    });
 }
 
 // RSA verify
 function verifyRSA() {
-  return window.crypto.subtle.verify(
-      {
-          name: "RSA-PSS",
-          saltLength: 128, //the length of the salt
+  return window.crypto.subtle.verify({
+        name: "RSA-PSS",
+        saltLength: 128, //the length of the salt
       },
       publicKey, //from generateKey or importKey above
       signature, //ArrayBuffer of the signature
       data //ArrayBuffer of the data
-  )
-  .then(function(isvalid){
+    )
+    .then(function(isvalid) {
       //returns a boolean on whether the signature is true or not
       console.log(isvalid);
-  })
-  .catch(function(err){
+    })
+    .catch(function(err) {
       console.error(err);
-  });
+    });
 }
 
 // Generate AES Key
@@ -134,30 +132,34 @@ function AESDecrypt(key, data, generatedIv) {
 var rsaPublicKey;
 var rsaPrivateKey;
 generateRSA().then((key) => {
-    rsaPublicKey = key.publicKey;
-    rsaPrivateKey = key.privateKey;
+  rsaPublicKey = key.publicKey;
+  rsaPrivateKey = key.privateKey;
 
-    console.log(rsaPublicKey);
-    console.log(rsaPrivateKey);
+  // console.log(rsaPublicKey);
+  // console.log(rsaPrivateKey);
 });
 
 //AES
 var aesKey;
 generateAES().then((res) => {
   aesKey = res;
-  console.log(aesKey);
+  // console.log(aesKey);
   var buffer = new ArrayBuffer(100);
-  console.log(buffer);
+  // console.log(buffer);
 
   AESEncrypt(aesKey, buffer).then((res) => {
     aesKey = res[0];
     var encryptedData = res[1];
     var generatedIv = res[2];
-    console.log(encryptedData);
+    // console.log(encryptedData);
 
     AESDecrypt(aesKey, encryptedData, generatedIv).then((res) => {
       var data = res;
-      console.log(data);
+      // console.log(data);
     });
   });
+});
+
+$(function() {
+  // would like to put protocol here but it cant find socketio. @TODO
 });
