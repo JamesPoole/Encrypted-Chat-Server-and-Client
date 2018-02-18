@@ -38,6 +38,12 @@ io.on('connection', function(socket) {
     chatEncrypted = true; // when we have a sucessful encrypted pipe
   });
 
+  // User uploads a file
+  socket.on('file', function(msg){
+    console.log("file uploaded")
+    io.emit('file', 'File Uploaded');
+  });
+
 
   socket.on('disconnect', function() {
     console.log('user disconnected');

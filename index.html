@@ -14,18 +14,20 @@
 	<meta name="theme-color" content="#ffffff">
 	<title>EncrypChat</title>
 	<style>
-	/* label underline focus color */
-	.row .input-field input:focus {
-		border-bottom: 1px solid purple !important;
-		box-shadow: 0 1px 0 0 purple !important
-	}
-	.switch label input[type=checkbox]:checked+.lever {
-  	background-color: #ce93d8;
-	}
+		/* label underline focus color */
 
-	.switch label input[type=checkbox]:checked+.lever:after {
-  	background-color: #ab47bc;
-	}
+		.row .input-field input:focus {
+			border-bottom: 1px solid purple !important;
+			box-shadow: 0 1px 0 0 purple !important
+		}
+
+		.switch label input[type=checkbox]:checked+.lever {
+			background-color: #ce93d8;
+		}
+
+		.switch label input[type=checkbox]:checked+.lever:after {
+			background-color: #ab47bc;
+		}
 	</style>
 </head>
 
@@ -71,36 +73,45 @@
 				</button>
 			</div>
 			<div class="col s1">
-				<button class="btn-floating btn-large waves-effect waves-light purple" style="margin-top:5px">
+				<input type='file' id="files" hidden/>
+				<button class="btn-floating btn-large waves-effect waves-light purple" id="upload" style="margin-top:5px">
 					<i class="material-icons">attach_file</i>
 				</button>
 			</div>
 		</div>
 	</form>
-
-
 	<script type="text/javascript" src="materialize/js/materialize.min.js"></script>
 	<script src="/socket.io/socket.io.js"></script>
 	<script src="https://code.jquery.com/jquery-1.11.1.js"></script>
 	<script type="text/javascript" src="/js/EncrypChat.js"></script>
 	<script>
-	$(document).ready(function(){
-		$("a.submit").click(function(){
-			document.getElementById("chatBox").submit();
+		$(document).ready(function() {
+			$("a.submit").click(function() {
+				document.getElementById("chatBox").submit();
+			});
 		});
-	});
-
-
+	</script>
+	<script>
+		$("#upload").click(function(e) {
+			// Stop upload button from being a submit button
+			e.preventDefault();
+			// Start upload file gui
+			$("#files").click();
+		});
 	</script>
 	<script>
 		$(function() {
 			var socket = io();
+			var input = $('#files')[0],
+				fileData;
 			// print not encrypted
 			socket.on('normalMessage', function(msg) {
 				if ($('#encryptChat').is(":checked") == true) {
 					$('#encryptChat').click(); // ensure the encrypted button is in sync
 				}
+				// append incoming message from server to messages div
 				$('#messages').append($('<p>').text(msg));
+				// make sure the latest message (bottom of scrollbar) is shown
 				$("#messages").scrollTop($("#messages")[0].scrollHeight);
 			});
 
@@ -109,7 +120,10 @@
 				if ($('#encryptChat').is(":checked") == false) {
 					$('#encryptChat').click(); // ensure the encrypted button is in sync
 				}
-				$('#messages').append($('<li>').text('SECURE -> ' + msg));
+				// append incoming message from server to messages div
+				$('#messages').append($('<p>').text('SECURE -> ' + msg));
+				// make sure the latest message (bottom of scrollbar) is shown
+				$("#messages").scrollTop($("#messages")[0].scrollHeight);
 			});
 
 			// Get message and decide if it should be encrypted or not
@@ -129,6 +143,48 @@
 			socket.on('getResponse1', function(msg) {
 				// first
 			});
+
+			// Get file that was sent
+			socket.on('file', function(msg) {
+				// placeholder!! currently just notifies of file upload
+				// deal with file data here
+				$('#messages').append($('<p>').text(msg));
+				$("#messages").scrollTop($("#messages")[0].scrollHeight);
+			});
+
+			// Eventhandler for file input.
+			function openfile(evt) {
+				var files = input.files;
+				// Pass the file to the blob, not the input[0].
+				fileData = new Blob([files[0]]);
+				// Pass getBuffer to promise.
+				var promise = new Promise(getBuffer);
+				// Wait for promise to be resolved, or log error.
+				promise.then(function(data) {
+					// Send base64 encoded data of byte array of image through socket io
+					var b64encoded = btoa(String.fromCharCode.apply(null, data));
+					socket.emit('file', b64encoded);
+				}).catch(function(err) {
+					console.log('Error: ', err);
+				});
+			}
+
+			/*
+			  Create a function which will be passed to the promise
+			  and resolve it when FileReader has finished loading the file.
+			*/
+			function getBuffer(resolve) {
+				var reader = new FileReader();
+				reader.readAsArrayBuffer(fileData);
+				reader.onload = function() {
+					var arrayBuffer = reader.result
+					var bytes = new Uint8Array(arrayBuffer);
+					resolve(bytes);
+				}
+			}
+
+			// Eventlistener for file input.
+			input.addEventListener('change', openfile, false);
 		});
 	</script>
 </body>
