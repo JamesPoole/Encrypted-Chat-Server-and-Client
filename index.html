@@ -14,18 +14,20 @@
 	<meta name="theme-color" content="#ffffff">
 	<title>EncrypChat</title>
 	<style>
-	/* label underline focus color */
-	.row .input-field input:focus {
-		border-bottom: 1px solid purple !important;
-		box-shadow: 0 1px 0 0 purple !important
-	}
-	.switch label input[type=checkbox]:checked+.lever {
-  	background-color: #ce93d8;
-	}
+		/* label underline focus color */
 
-	.switch label input[type=checkbox]:checked+.lever:after {
-  	background-color: #ab47bc;
-	}
+		.row .input-field input:focus {
+			border-bottom: 1px solid purple !important;
+			box-shadow: 0 1px 0 0 purple !important
+		}
+
+		.switch label input[type=checkbox]:checked+.lever {
+			background-color: #ce93d8;
+		}
+
+		.switch label input[type=checkbox]:checked+.lever:after {
+			background-color: #ab47bc;
+		}
 	</style>
 </head>
 
@@ -41,7 +43,6 @@
 		</div>
 		<div class="switch col s2" style="margin-top:15px">
 			<label>
-				Chat
 				<input type="checkbox" id="encryptChat">
 				<span class="lever"></span>
 				Encrypt Chat
@@ -84,13 +85,11 @@
 	<script src="https://code.jquery.com/jquery-1.11.1.js"></script>
 	<script type="text/javascript" src="/js/EncrypChat.js"></script>
 	<script>
-	$(document).ready(function(){
-		$("a.submit").click(function(){
-			document.getElementById("chatBox").submit();
+		$(document).ready(function() {
+			$("a.submit").click(function() {
+				document.getElementById("chatBox").submit();
+			});
 		});
-	});
-
-
 	</script>
 	<script>
 		$(function() {
@@ -125,10 +124,49 @@
 			});
 
 			// protocol
-			// First step
-			socket.on('getResponse1', function(msg) {
-				// first
+
+			// Get public and private keys
+			socket.on('startRSA', function(msg) {
+				generateRSA().then((key) => {
+					rsaPublicKey = key.publicKey;
+					rsaPrivateKey = key.privateKey;
+					// export the public key and send it
+					exportRSA(rsaPublicKey).then((key) => {
+						var rsaExportedKey = key;
+						socket.emit('sendPublicKey', rsaExportedKey);
+					});
+				});
 			});
+
+			// get sent key from other user and import it
+			socket.on('receivePublicKey', function(msg) {
+				var rsaExportedKey_2 = msg;
+				importRSA_OAEP(rsaExportedKey_2).then((key) => {
+					rsaPublicKey_2 = key;
+					// $('#messages').append($('<li>').text('Other Users Public key -> ' + rsaPublicKey_2));
+					// console.log(rsaPublicKey_2);
+				});
+			});
+
+			// First step
+			socket.on('step1', function(msg) {
+				var ch1 = window.crypto.getRandomValues(new Uint8Array(6)); // random number challenge
+				hashSHA(ch1).then((hashed) => { // H(ch1) hashed challenge
+					signRSA(rsaPrivateKey, hashed).then((signedHash) => { // { H(ch1) }ka-1 signed hash with my private key
+						var message = ch1 + "," + signedHash;
+						encryptRSA(rsaPublicKey_2, message).then((data) => { // { ch1,{ H(ch1) }ka-1 }kb
+							var message = "A,B," + data; // A,B,{ ch1,{ H(ch1) }ka-1 }kb
+							socket.emit('getResponseStep2', message);
+						});
+					});
+				});
+			});
+
+			// Step 2
+			socket.on('step1', function(msg) {
+				// Step 2
+			});
+
 		});
 	</script>
 </body>
