@@ -63,6 +63,11 @@ io.on('connection', function(socket) {
   socket.broadcast.emit('step4', msg);
  });
 
+ // User uploads a file
+ socket.on('file', function(msg) {
+  console.log("file uploaded")
+  io.emit('file', 'File Uploaded');
+ });
 
  socket.on('disconnect', function() {
   //console.log('user disconnected');
