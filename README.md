@@ -1,4 +1,4 @@
 # CommsProject
 
-To run
+To run:
 node app
