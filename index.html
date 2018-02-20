@@ -198,11 +198,20 @@
 			// First step
 			socket.on('step1', function(msg) {
 				var ch1 = window.crypto.getRandomValues(new Uint8Array(6)); // random number challenge
+				console.log(ch1)
 				hashSHA(ch1).then((hashed) => { // H(ch1) hashed challenge
 					signRSA(rsaPrivateKey, hashed).then((signedHash) => { // { H(ch1) }ka-1 signed hash with my private key
-						var message = ch1 + "," + signedHash;
-						encryptRSA(rsaPublicKey_2, message).then((data) => { // { ch1,{ H(ch1) }ka-1 }kb
-							var message = "A,B," + data; // A,B,{ ch1,{ H(ch1) }ka-1 }kb
+						var combinedArray = new Uint8Array(ch1.length + signedHash.length);
+						combinedArray.set(ch1);
+						combinedArray.set(signedHash, ch1.length);
+						console.log(combinedArray);
+						//var message = ch1 + "," + signedHash;
+						encryptRSA(rsaPublicKey_2, combinedArray).then((data) => { // { ch1,{ H(ch1) }ka-1 }kb
+						  //console.log(data);
+							var message = data;
+							//var message = "A,B/" + blobData; // A,B,{ ch1,{ H(ch1) }ka-1 }kb
+
+							//console.log(message)
 							socket.emit('getResponseStep2', message);
 						});
 					});
@@ -210,7 +219,18 @@
 			});
 
 			// Step 2
-			socket.on('step1', function(msg) {
+			socket.on('step2', function(msg) {
+				msg = new Uint8Array(Object.values(msg));
+				console.log("Debug: Mark1");
+				exportPrivateRSA(rsaPrivateKey).then((exportedRSAKey) => {
+					console.log("Debug: Mark2");
+					importPrivateRSA_OAEP(exportedRSAKey).then((importedRSAKey) => {
+						console.log("Debug: Mark3");
+						decryptRSA(importedRSAKey, msg).then((data) => {
+							console.log(data);
+						});
+					});
+				});
 				// Step 2
 			});
 

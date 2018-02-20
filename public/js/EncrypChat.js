@@ -56,6 +56,21 @@ function exportRSA(publicKey) {
   });
 }
 
+function exportPrivateRSA(privateKey) {
+ return window.crypto.subtle.exportKey(
+   "pkcs8", //can be "jwk" (public or private), "spki" (public only), or "pkcs8" (private only)
+   privateKey //can be a publicKey or privateKey, as long as extractable was true
+  )
+  .then(function(keydata) {
+   //returns the exported key data
+   return keydata;
+   // console.log(keydata);
+  })
+  .catch(function(err) {
+   console.error(err);
+  });
+}
+
 function importRSA_PSS(exportedKey) {
  return window.crypto.subtle.importKey(
    "spki", //can be "jwk" (public or private), "spki" (public only), or "pkcs8" (private only)
@@ -89,6 +104,29 @@ function importRSA_OAEP(exportedKey) {
    },
    false, //whether the key is extractable (i.e. can be used in exportKey)
    ["encrypt"] //"encrypt" or "wrapKey" for public key import or
+   //"decrypt" or "unwrapKey" for private key imports
+  )
+  .then(function(publicKey) {
+   //returns a publicKey (or privateKey if you are importing a private key)
+   // console.log(publicKey);
+   return publicKey;
+  })
+  .catch(function(err) {
+   console.error(err);
+  });
+}
+
+function importPrivateRSA_OAEP(exportedKey) {
+ return window.crypto.subtle.importKey(
+   "pkcs8", //can be "jwk" (public or private), "spki" (public only), or "pkcs8" (private only)
+   exportedKey, { //these are the algorithm options
+    name: "RSA-OAEP",
+    hash: {
+     name: "SHA-256"
+    }, //can be "SHA-1", "SHA-256", "SHA-384", or "SHA-512"
+   },
+   false, //whether the key is extractable (i.e. can be used in exportKey)
+   ["decrypt"] //"encrypt" or "wrapKey" for public key import or
    //"decrypt" or "unwrapKey" for private key imports
   )
   .then(function(publicKey) {
@@ -140,8 +178,10 @@ function encryptRSA(publicKey, data) {
   });
 }
 
-// decrypt with publicKey
-function decryptRSA(publicKey, data) {
+// decrypt with privateKey
+function decryptRSA(privateKey, data) {
+  console.log(data);
+  console.log(privateKey);
  return window.crypto.subtle.decrypt({
     name: "RSA-OAEP",
     //label: Uint8Array([...]) //optional
@@ -150,7 +190,10 @@ function decryptRSA(publicKey, data) {
    new Uint8Array(data) //ArrayBuffer of the data
   )
   .then(function(decrypted) {
+    console.log("Mark5");
    //returns an ArrayBuffer containing the decrypted data
+   console.log("This far");
+   console.log(decrypted);
    var data = new Uint8Array(decrypted);
    return data;
   })
