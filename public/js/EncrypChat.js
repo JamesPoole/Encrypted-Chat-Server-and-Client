@@ -1,7 +1,7 @@
 // Hash with SHA
 function hashSHA(data) {
  return window.crypto.subtle.digest({
-    name: "SHA-1",
+    name: "SHA-256",
    },
    data //The data you want to hash as an ArrayBuffer
   )
@@ -80,7 +80,7 @@ function importRSA_PSS(exportedKey) {
      name: "SHA-256"
     }, //can be "SHA-1", "SHA-256", "SHA-384", or "SHA-512"
    },
-   false, //whether the key is extractable (i.e. can be used in exportKey)
+   true, //whether the key is extractable (i.e. can be used in exportKey)
    ["verify"] //"verify" for public key import, "sign" for private key imports
   )
   .then(function(publicKey) {
@@ -102,7 +102,7 @@ function importRSA_OAEP(exportedKey) {
      name: "SHA-256"
     }, //can be "SHA-1", "SHA-256", "SHA-384", or "SHA-512"
    },
-   false, //whether the key is extractable (i.e. can be used in exportKey)
+   true, //whether the key is extractable (i.e. can be used in exportKey)
    ["encrypt"] //"encrypt" or "wrapKey" for public key import or
    //"decrypt" or "unwrapKey" for private key imports
   )
@@ -125,7 +125,7 @@ function importPrivateRSA_OAEP(exportedKey) {
      name: "SHA-256"
     }, //can be "SHA-1", "SHA-256", "SHA-384", or "SHA-512"
    },
-   false, //whether the key is extractable (i.e. can be used in exportKey)
+   true, //whether the key is extractable (i.e. can be used in exportKey)
    ["decrypt"] //"encrypt" or "wrapKey" for public key import or
    //"decrypt" or "unwrapKey" for private key imports
   )
@@ -200,7 +200,7 @@ function decryptRSA(privateKey, data) {
 }
 
 // RSA verify
-function verifyRSA() {
+function verifyRSA(publicKey, signature, data) {
  return window.crypto.subtle.verify({
     name: "RSA-PSS",
     saltLength: 128, //the length of the salt
@@ -211,7 +211,8 @@ function verifyRSA() {
   )
   .then(function(isvalid) {
    //returns a boolean on whether the signature is true or not
-   console.log(isvalid);
+   //console.log(isvalid);
+   return isvalid;
   })
   .catch(function(err) {
    console.error(err);
@@ -290,6 +291,7 @@ function AESDecrypt(key, data, generatedIv) {
 var rsaPublicKey; // My public
 var rsaPrivateKey; // my private
 var rsaPublicKey_2; // Other users public key
+var aesKeyHash;
 
 
 //AES

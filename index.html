@@ -198,16 +198,16 @@
 
 			// First step
 			socket.on('step1', function(msg) {
-				var ch1 = window.crypto.getRandomValues(new Uint8Array(6)); // random number challenge
+				var passA = window.crypto.getRandomValues(new Uint8Array(6)); // random number challenge
 				console.log("Step 1 challenge: ")
-				console.log(ch1);
-				hashSHA(ch1).then((hashed) => { // H(ch1) hashed challenge
+				console.log(passA);
+				hashSHA(passA).then((hashed) => { // H(passA) hashed challenge
 					//console.log(hashed);
-					signRSA(rsaPrivateKey, hashed).then((signedHash) => { // { H(ch1) }ka-1 signed hash with my private key
+					signRSA(rsaPrivateKey, hashed).then((signedHash) => { // { H(passA) }ka-1 signed hash with my private key
 						console.log(signedHash);
-						var combinedArray = new Uint8Array(ch1.length + signedHash.length);
-						combinedArray.set(ch1);
-						combinedArray.set(signedHash, ch1.length);
+						var combinedArray = new Uint8Array(passA.length + signedHash.length);
+						combinedArray.set(passA);
+						combinedArray.set(signedHash, passA.length);
 						// console.log(combinedArray);
 						var splitCombinedArray = combinedArray.slice(0, 190);
 						var splitCombinedArray_2 = combinedArray.slice(190, combinedArray.length);
@@ -223,13 +223,13 @@
 
 						encryptRSA(rsaPublicKey_2, splitCombinedArray).then((data) => {
 							encryptRSA(rsaPublicKey_2, splitCombinedArray_2).then((data_2) => {
-								var combinedArray = new Uint8Array(data.length + data_2.length); // { ch1,{ H(ch1) }ka-1 }kb
+								var combinedArray = new Uint8Array(data.length + data_2.length); // { passA,{ H(passA) }ka-1 }kb
 								combinedArray.set(data);
 								combinedArray.set(data_2, data.length);
 								console.log("Encrypted Message being sent");
 								console.log(combinedArray);
 								var message = combinedArray;
-								//var message = "A,B/" + blobData; // A,B,{ ch1,{ H(ch1) }ka-1 }kb
+								//var message = "A,B/" + blobData; // A,B,{ passA,{ H(passA) }ka-1 }kb
 
 								//console.log(message)
 								socket.emit('getResponseStep2', message);
@@ -251,23 +251,52 @@
 						var splitCombinedArray = combinedArray.slice(0, 256);
 						var splitCombinedArray_2 = combinedArray.slice(256, 512);
 
-							decryptRSA(importedRSAKey, splitCombinedArray).then((data) => {
+						decryptRSA(importedRSAKey, splitCombinedArray).then((data) => {
 							decryptRSA(importedRSAKey, splitCombinedArray_2).then((data_2) => {
-								var combinedArray = new Uint8Array(data.length + data_2.length); // { ch1,{ H(ch1) }ka-1 }kb
+								var combinedArray = new Uint8Array(data.length + data_2.length); // { passA,{ H(passA) }ka-1 }kb
 								combinedArray.set(data);
 								combinedArray.set(data_2, data.length);
 								console.log("Unencrypted message :");
 								console.log(combinedArray);
 								var message = combinedArray;
-								console.log("Challenge 1 :");
-								console.log(message.slice(0,6));
+								console.log("Pass A :");
+								var passA = message.slice(0,6); // PassA
+								console.log(passA);
 								console.log("Signed Hash of Ch 1 :");
-								console.log(message.slice(6,262));
+								var signature = message.slice(6,262);
+								console.log(signature);
+								hashSHA(passA).then((hashed) => { // H(PassA)
+									exportRSA(rsaPublicKey_2).then((exportedPublicRSAKey) => {
+										importRSA_PSS(exportedPublicRSAKey).then((importedPublicRSAKey) => {
+											verifyRSA(importedPublicRSAKey, signature, hashed).then((isvalid) =>{
+												if (isvalid){
+													var passB = window.crypto.getRandomValues(new Uint8Array(6));  // Create random number PassB
+													console.log("Pass B");
+													console.log(passB);
+													var aesKey = new Uint8Array(passA.length + passB.length);
+													aesKey.set(passA);
+													aesKey.set(passB, passA.length); // PassA||PassB
+													console.log("Aes Key:")
+													console.log(aesKey);
+													hashSHA(aesKey).then((hashed) => {  // hash newly created AES Key
+														aesKeyHash = hashed;  // Kab = H(PassA || PassB)
+														console.log("Hashed AES Key:")
+														console.log(aesKeyHash)
+													});
+												}
+											});
+										});
+									});
+								});
 							});
-							});
+						});
 					});
 				});
-				// Step 2
+			});
+
+			// Step 3
+			socket.on('step3', function(msg){
+
 			});
 
 		});
