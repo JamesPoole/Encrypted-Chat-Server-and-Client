@@ -103,7 +103,8 @@
 	<script>
 		$(function() {
 			var socket = io();
-			var input = $('#files')[0], fileData;
+			var input = $('#files')[0],
+				fileData;
 			// print not encrypted
 			socket.on('normalMessage', function(msg) {
 				if ($('#encryptChat').is(":checked") == true) {
@@ -162,10 +163,10 @@
 			function getB64(resolve) {
 				var reader = new FileReader();
 				reader.readAsDataURL(fileData);
-			  reader.onloadend = function() {
-			      base64data = reader.result;
-						resolve(base64data);
-			  }
+				reader.onloadend = function() {
+					base64data = reader.result;
+					resolve(base64data);
+				}
 			}
 			// Eventlistener for file input.
 			input.addEventListener('change', openfile, false);
@@ -198,21 +199,41 @@
 			// First step
 			socket.on('step1', function(msg) {
 				var ch1 = window.crypto.getRandomValues(new Uint8Array(6)); // random number challenge
-				console.log(ch1)
+				console.log("Step 1 challenge: ")
+				console.log(ch1);
 				hashSHA(ch1).then((hashed) => { // H(ch1) hashed challenge
+					//console.log(hashed);
 					signRSA(rsaPrivateKey, hashed).then((signedHash) => { // { H(ch1) }ka-1 signed hash with my private key
+						console.log(signedHash);
 						var combinedArray = new Uint8Array(ch1.length + signedHash.length);
 						combinedArray.set(ch1);
 						combinedArray.set(signedHash, ch1.length);
-						console.log(combinedArray);
-						//var message = ch1 + "," + signedHash;
-						encryptRSA(rsaPublicKey_2, combinedArray).then((data) => { // { ch1,{ H(ch1) }ka-1 }kb
-						  //console.log(data);
-							var message = data;
-							//var message = "A,B/" + blobData; // A,B,{ ch1,{ H(ch1) }ka-1 }kb
+						// console.log(combinedArray);
+						var splitCombinedArray = combinedArray.slice(0, 190);
+						var splitCombinedArray_2 = combinedArray.slice(190, combinedArray.length);
 
-							//console.log(message)
-							socket.emit('getResponseStep2', message);
+						// var enc = new TextEncoder("utf-8");
+						// var message = "this is a secret message"; // max length 190
+						// var arrb = enc.encode(message);
+						// console.log(message);
+						// console.log(arrb);
+						// var dec = new TextDecoder("utf-8");
+						// var arrb = enc.decode(data);
+						// console.log(arrb);
+
+						encryptRSA(rsaPublicKey_2, splitCombinedArray).then((data) => {
+							encryptRSA(rsaPublicKey_2, splitCombinedArray_2).then((data_2) => {
+								var combinedArray = new Uint8Array(data.length + data_2.length); // { ch1,{ H(ch1) }ka-1 }kb
+								combinedArray.set(data);
+								combinedArray.set(data_2, data.length);
+								console.log("Encrypted Message being sent");
+								console.log(combinedArray);
+								var message = combinedArray;
+								//var message = "A,B/" + blobData; // A,B,{ ch1,{ H(ch1) }ka-1 }kb
+
+								//console.log(message)
+								socket.emit('getResponseStep2', message);
+							});
 						});
 					});
 				});
@@ -220,15 +241,30 @@
 
 			// Step 2
 			socket.on('step2', function(msg) {
-				msg = new Uint8Array(Object.values(msg));
-				console.log("Debug: Mark1");
+				combinedArray = new Uint8Array(Object.values(msg));
+				console.log("Message received");
+				console.log(combinedArray);
+
 				exportPrivateRSA(rsaPrivateKey).then((exportedRSAKey) => {
-					console.log("Debug: Mark2");
 					importPrivateRSA_OAEP(exportedRSAKey).then((importedRSAKey) => {
-						console.log("Debug: Mark3");
-						decryptRSA(importedRSAKey, msg).then((data) => {
-							console.log(data);
-						});
+
+						var splitCombinedArray = combinedArray.slice(0, 256);
+						var splitCombinedArray_2 = combinedArray.slice(256, 512);
+
+							decryptRSA(importedRSAKey, splitCombinedArray).then((data) => {
+							decryptRSA(importedRSAKey, splitCombinedArray_2).then((data_2) => {
+								var combinedArray = new Uint8Array(data.length + data_2.length); // { ch1,{ H(ch1) }ka-1 }kb
+								combinedArray.set(data);
+								combinedArray.set(data_2, data.length);
+								console.log("Unencrypted message :");
+								console.log(combinedArray);
+								var message = combinedArray;
+								console.log("Challenge 1 :");
+								console.log(message.slice(0,6));
+								console.log("Signed Hash of Ch 1 :");
+								console.log(message.slice(6,262));
+							});
+							});
 					});
 				});
 				// Step 2

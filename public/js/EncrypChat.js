@@ -1,7 +1,7 @@
 // Hash with SHA
 function hashSHA(data) {
  return window.crypto.subtle.digest({
-    name: "SHA-256",
+    name: "SHA-1",
    },
    data //The data you want to hash as an ArrayBuffer
   )
@@ -180,8 +180,8 @@ function encryptRSA(publicKey, data) {
 
 // decrypt with privateKey
 function decryptRSA(privateKey, data) {
-  console.log(data);
-  console.log(privateKey);
+ // console.log(data);
+ // console.log(privateKey);
  return window.crypto.subtle.decrypt({
     name: "RSA-OAEP",
     //label: Uint8Array([...]) //optional
@@ -190,10 +190,7 @@ function decryptRSA(privateKey, data) {
    new Uint8Array(data) //ArrayBuffer of the data
   )
   .then(function(decrypted) {
-    console.log("Mark5");
    //returns an ArrayBuffer containing the decrypted data
-   console.log("This far");
-   console.log(decrypted);
    var data = new Uint8Array(decrypted);
    return data;
   })
