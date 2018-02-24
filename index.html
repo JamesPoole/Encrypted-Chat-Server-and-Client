@@ -40,6 +40,7 @@
 	<div class="row">
 		<div class="col s10" style="margin-top:10px">
 			<h6 style="margin-left:5px"> Messages </h6>
+			<a href="http://localhost:3000/download/Gantt Chart Interim report.png">Visit our HTML tutorial</a>
 		</div>
 		<div class="switch col s2" style="margin-top:15px">
 			<label>
@@ -83,6 +84,7 @@
 
 	<script type="text/javascript" src="materialize/js/materialize.min.js"></script>
 	<script src="/socket.io/socket.io.js"></script>
+	<script src="socket.io-file-client.js"></script>
 	<script src="https://code.jquery.com/jquery-1.11.1.js"></script>
 	<script type="text/javascript" src="/js/EncrypChat.js"></script>
 	<script>
@@ -103,8 +105,27 @@
 	<script>
 		$(function() {
 			var socket = io();
+			var uploader = new SocketIOFileClient(socket);
 			var input = $('#files')[0],
 				fileData;
+
+				// Here for debugging
+			uploader.on('start', function(fileInfo) {
+    		console.log('Start uploading', fileInfo);
+			});
+			uploader.on('stream', function(fileInfo) {
+    		console.log('Streaming... sent ' + fileInfo.sent + ' bytes.');
+			});
+			uploader.on('complete', function(fileInfo) {
+    		console.log('Upload Complete', fileInfo);
+			});
+			uploader.on('error', function(err) {
+    		console.log('Error!', err);
+			});
+			uploader.on('abort', function(fileInfo) {
+    		console.log('Aborted: ', fileInfo);
+			});
+
 			// print not encrypted
 			socket.on('normalMessage', function(msg) {
 				if ($('#encryptChat').is(":checked") == true) {
@@ -134,41 +155,25 @@
 				return false;
 			});
 
-			// Get file that was sent
+			// Get file url that was sent
 			socket.on('file', function(msg) {
 				// placeholder!! currently just notifies of file upload
 				// deal with file data here
-				$('#messages').append($('<p>').text(msg));
+				$('#messages').append('<p><a href="http://localhost:3000/download/' + msg + '">' + msg +'</a></p>');
 				$("#messages").scrollTop($("#messages")[0].scrollHeight);
 			});
+
 			// Eventhandler for file input.
 			function openfile(evt) {
 				var files = input.files;
-				// Pass the file to the blob, not the input[0].
 				var fileReader = new FileReader();
-
 				fileReader.readAsDataURL(files[0]);
-
 				fileReader.onload = function(e) {
-					
-				}
-			}
-			/*
-			  Create a function which will be passed to the promise
-			  and resolve it when FileReader has finished loading the file.
-			*/
-			function getB64(resolve) {
-				var reader = new FileReader();
-				reader.readAsDataURL(fileData);
-				reader.onloadend = function() {
-					base64data = reader.result;
-					resolve(base64data);
+					var uploadIds = uploader.upload(files);
 				}
 			}
 			// Eventlistener for file input.
 			input.addEventListener('change', openfile, false);
-
-			// protocol
 
 			// Get public and private keys
 			socket.on('startRSA', function(msg) {

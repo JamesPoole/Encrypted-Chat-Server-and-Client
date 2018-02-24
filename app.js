@@ -2,7 +2,7 @@ var express = require('express');
 var app = express();
 var http = require('http').Server(app);
 var io = require('socket.io').listen(http);
-const SocketIOFile = require('socket.io-file');
+var SocketIOFile = require('socket.io-file');
 var chatEncrypted = false;
 var userCount = 0;
 
@@ -12,6 +12,15 @@ app.get('/', function(req, res) {
 
 app.use(express.static(__dirname + '/public'));
 
+app.get('/socket.io-file-client.js', (req, res, next) => {
+    return res.sendFile(__dirname + '/node_modules/socket.io-file-client/socket.io-file-client.js');
+});
+
+app.get('/download/:path', function(req, res){
+  var file = __dirname + '/data/' + req.params.path;
+  res.download(file); // Set disposition and send it.
+});
+
 http.listen(3000, "0.0.0.0", function() {
  console.log('listening on *:3000');
 });
@@ -20,7 +29,34 @@ io.on('connection', function(socket) {
  userCount += 1;
  if (userCount == 2) {
   io.emit('startRSA');
+
  }
+
+ var uploader = new SocketIOFile(socket, {
+   uploadDir: 'data',
+   chunkSize: 10240,
+   transmissionDelay: 0,
+   overwrite: true
+ });
+
+    uploader.on('start', (fileInfo) => {
+        console.log('Start uploading');
+        console.log(fileInfo);
+    });
+    uploader.on('stream', (fileInfo) => {
+        console.log(`${fileInfo.wrote} / ${fileInfo.size} byte(s)`);
+    });
+    uploader.on('complete', (fileInfo) => {
+        console.log('Upload Complete.');
+        console.log(fileInfo.name);
+        io.emit('file', fileInfo.name);
+    });
+    uploader.on('error', (err) => {
+        console.log('Error!', err);
+    });
+    uploader.on('abort', (fileInfo) => {
+        console.log('Aborted: ', fileInfo);
+    });
 
  // send normal message to everyone
  socket.on('normalMessage', function(msg) {
