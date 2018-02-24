@@ -40,7 +40,6 @@
 	<div class="row">
 		<div class="col s10" style="margin-top:10px">
 			<h6 style="margin-left:5px"> Messages </h6>
-			<a href="http://localhost:3000/download/Gantt Chart Interim report.png">Visit our HTML tutorial</a>
 		</div>
 		<div class="switch col s2" style="margin-top:15px">
 			<label>
@@ -157,8 +156,6 @@
 
 			// Get file url that was sent
 			socket.on('file', function(msg) {
-				// placeholder!! currently just notifies of file upload
-				// deal with file data here
 				$('#messages').append('<p><a href="http://localhost:3000/download/' + msg + '">' + msg +'</a></p>');
 				$("#messages").scrollTop($("#messages")[0].scrollHeight);
 			});
