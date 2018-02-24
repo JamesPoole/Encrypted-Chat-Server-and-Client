@@ -7,6 +7,7 @@
 	<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 	<!--Import materialize.css-->
 	<link type="text/css" rel="stylesheet" href="/materialize/css/materialize.min.css" media="screen,projection" />
+	<link type="text/css" rel="stylesheet" href="/css/chatbubble.css" media="screen,projection" />
 	<!--Let browser know website is optimized for mobile-->
 	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 	<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
@@ -28,6 +29,8 @@
 		.switch label input[type=checkbox]:checked+.lever:after {
 			background-color: #ab47bc;
 		}
+		.clear { clear:both;}
+		.removemargin { margin-top:-10px;}
 	</style>
 </head>
 
@@ -49,15 +52,12 @@
 			</label>
 		</div>
 	</div>
-	<div class="divider"></div>
 	<div class="section">
 		<div class="chat">
-			<div id="messages" style="margin-left:5px; overflow:auto; height:400px">
+			<div id="messages" style="overflow:auto; height:400px; padding-top:10px">
 			</div>
 		</div>
 	</div>
-	<div class="divider"></div>
-
 	<form action="" id="chatBox">
 		<div class="row" style="position: fixed; bottom: 0; width: 100%;">
 			<div class="input-field col s2">
@@ -130,7 +130,17 @@
 				if ($('#encryptChat').is(":checked") == true) {
 					$('#encryptChat').click(); // ensure the encrypted button is in sync
 				}
-				$('#messages').append($('<p>').text(msg));
+				var append_string = "";
+				var incoming_nickname = msg.substr(0, msg.indexOf('-'));
+				var current_nickname = $('#nick').val();
+				msg = msg.split('-')[1];
+
+				if (incoming_nickname == current_nickname){
+					append_string = '<div class="removemargin talk-bubble tri-right right-top" style="float:right;"><div class="talktext"><p>'+ msg +'</p></div></div><div class="clear"></div>'
+				} else {
+					append_string = '<div class="removemargin talk-bubble tri-right left-top"><div class="talktext"><p>'+ msg +'</p></div></div><div class="clear"></div>'
+				}
+				$('#messages').append($(append_string));
 				$("#messages").scrollTop($("#messages")[0].scrollHeight);
 			});
 
@@ -139,7 +149,19 @@
 				if ($('#encryptChat').is(":checked") == false) {
 					$('#encryptChat').click(); // ensure the encrypted button is in sync
 				}
-				$('#messages').append($('<li>').text('SECURE -> ' + msg));
+				var append_string = "";
+				var incoming_nickname = msg.substr(0, msg.indexOf('-'));
+				var current_nickname = $('#nick').val();
+				msg = msg.split('-')[1];
+
+				if (incoming_nickname == current_nickname){
+					append_string = '<div class="removemargin talk-bubble tri-right right-top" style="float:right;"><div class="talktext"><p>SECURE -> '+ msg +'</p></div></div><div class="clear"></div>'
+				} else {
+					append_string = '<div class="removemargin talk-bubble tri-right left-top"><div class="talktext"><p>SECURE -> '+ msg +'</p></div></div><div class="clear"></div>'
+				}
+
+				$('#messages').append($(append_string));
+				$("#messages").scrollTop($("#messages")[0].scrollHeight);
 			});
 
 			// Get message and decide if it should be encrypted or not
@@ -148,7 +170,7 @@
 					socket.emit('encryptProtocol', "Start chat encryption");
 					socket.emit('encryptedMessage', $('#nick').val() + " - " + $('#m').val());
 				} else {
-					socket.emit('normalMessage', $('#nick').val() + " - " + $('#m').val());
+					socket.emit('normalMessage', $('#nick').val() + "-" + $('#m').val());
 				}
 				$('#m').val('');
 				return false;
@@ -156,17 +178,33 @@
 
 			// Get file url that was sent
 			socket.on('file', function(msg) {
-				$('#messages').append('<p><a href="http://localhost:3000/download/' + msg + '">' + msg +'</a></p>');
+				console.log(msg);
+				var display_message = "";
+				var incoming_nickname = msg.substr(0, msg.indexOf('$'));
+				var current_nickname = $('#nick').val();
+				msg = msg.split('$')[1];
+				console.log(msg)
+
+				if (incoming_nickname == current_nickname){
+					display_message = '<div class="removemargin talk-bubble tri-right right-top" style="float:right;"><div class="talktext"><p><a href="' + document.URL +'download/' + msg + '">' + msg +'</a></p></div></div><div class="clear"></div>'
+				} else {
+					display_message = '<div class="removemargin talk-bubble tri-right left-top"><div class="talktext"><p><a href="' + document.URL +'download/' + msg + '">' + msg +'</a></p></div></div><div class="clear"></div>'
+				}
+				//display_message = '<p><a href="' + document.URL +'download/' + msg + '">' + msg +'</a></p>'
+				$('#messages').append(display_message);
 				$("#messages").scrollTop($("#messages")[0].scrollHeight);
 			});
 
 			// Eventhandler for file input.
 			function openfile(evt) {
 				var files = input.files;
+				var nickname = $('#nick').val();
 				var fileReader = new FileReader();
 				fileReader.readAsDataURL(files[0]);
 				fileReader.onload = function(e) {
-					var uploadIds = uploader.upload(files);
+					var uploadIds = uploader.upload(files, {
+						data:nickname
+					});
 				}
 			}
 			// Eventlistener for file input.

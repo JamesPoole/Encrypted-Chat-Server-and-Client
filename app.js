@@ -49,7 +49,7 @@ io.on('connection', function(socket) {
     uploader.on('complete', (fileInfo) => {
         console.log('Upload Complete.');
         console.log(fileInfo.name);
-        io.emit('file', fileInfo.name);
+        io.emit('file', fileInfo.data + '$' + fileInfo.name);
     });
     uploader.on('error', (err) => {
         console.log('Error!', err);
