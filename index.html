@@ -29,8 +29,14 @@
 		.switch label input[type=checkbox]:checked+.lever:after {
 			background-color: #ab47bc;
 		}
-		.clear { clear:both;}
-		.removemargin { margin-top:-10px;}
+
+		.clear {
+			clear: both;
+		}
+
+		.removemargin {
+			margin-top: -10px;
+		}
 	</style>
 </head>
 
@@ -108,21 +114,21 @@
 			var input = $('#files')[0],
 				fileData;
 
-				// Here for debugging
+			// Here for debugging
 			uploader.on('start', function(fileInfo) {
-    		console.log('Start uploading', fileInfo);
+				console.log('Start uploading', fileInfo);
 			});
 			uploader.on('stream', function(fileInfo) {
-    		console.log('Streaming... sent ' + fileInfo.sent + ' bytes.');
+				console.log('Streaming... sent ' + fileInfo.sent + ' bytes.');
 			});
 			uploader.on('complete', function(fileInfo) {
-    		console.log('Upload Complete', fileInfo);
+				console.log('Upload Complete', fileInfo);
 			});
 			uploader.on('error', function(err) {
-    		console.log('Error!', err);
+				console.log('Error!', err);
 			});
 			uploader.on('abort', function(fileInfo) {
-    		console.log('Aborted: ', fileInfo);
+				console.log('Aborted: ', fileInfo);
 			});
 
 			// print not encrypted
@@ -135,10 +141,10 @@
 				var current_nickname = $('#nick').val();
 				msg = msg.split('-')[1];
 
-				if (incoming_nickname == current_nickname){
-					append_string = '<div class="removemargin talk-bubble tri-right right-top" style="float:right;"><div class="talktext"><p>'+ msg +'</p></div></div><div class="clear"></div>'
+				if (incoming_nickname == current_nickname) {
+					append_string = '<div class="removemargin talk-bubble tri-right right-top" style="float:right;"><div class="talktext"><p>' + msg + '</p></div></div><div class="clear"></div>'
 				} else {
-					append_string = '<div class="removemargin talk-bubble tri-right left-top"><div class="talktext"><p>'+ msg +'</p></div></div><div class="clear"></div>'
+					append_string = '<div class="removemargin talk-bubble tri-right left-top"><div class="talktext"><p>' + msg + '</p></div></div><div class="clear"></div>'
 				}
 				$('#messages').append($(append_string));
 				$("#messages").scrollTop($("#messages")[0].scrollHeight);
@@ -154,10 +160,10 @@
 				var current_nickname = $('#nick').val();
 				msg = msg.split('-')[1];
 
-				if (incoming_nickname == current_nickname){
-					append_string = '<div class="removemargin talk-bubble tri-right right-top" style="float:right;"><div class="talktext"><p>SECURE -> '+ msg +'</p></div></div><div class="clear"></div>'
+				if (incoming_nickname == current_nickname) {
+					append_string = '<div class="removemargin talk-bubble tri-right right-top" style="float:right;"><div class="talktext"><p>SECURE -> ' + msg + '</p></div></div><div class="clear"></div>'
 				} else {
-					append_string = '<div class="removemargin talk-bubble tri-right left-top"><div class="talktext"><p>SECURE -> '+ msg +'</p></div></div><div class="clear"></div>'
+					append_string = '<div class="removemargin talk-bubble tri-right left-top"><div class="talktext"><p>SECURE -> ' + msg + '</p></div></div><div class="clear"></div>'
 				}
 
 				$('#messages').append($(append_string));
@@ -185,10 +191,10 @@
 				msg = msg.split('$')[1];
 				console.log(msg)
 
-				if (incoming_nickname == current_nickname){
-					display_message = '<div class="removemargin talk-bubble tri-right right-top" style="float:right;"><div class="talktext"><p><a href="' + document.URL +'download/' + msg + '">' + msg +'</a></p></div></div><div class="clear"></div>'
+				if (incoming_nickname == current_nickname) {
+					display_message = '<div class="removemargin talk-bubble tri-right right-top" style="float:right;"><div class="talktext"><p><a href="' + document.URL + 'download/' + msg + '">' + msg + '</a></p></div></div><div class="clear"></div>'
 				} else {
-					display_message = '<div class="removemargin talk-bubble tri-right left-top"><div class="talktext"><p><a href="' + document.URL +'download/' + msg + '">' + msg +'</a></p></div></div><div class="clear"></div>'
+					display_message = '<div class="removemargin talk-bubble tri-right left-top"><div class="talktext"><p><a href="' + document.URL + 'download/' + msg + '">' + msg + '</a></p></div></div><div class="clear"></div>'
 				}
 				//display_message = '<p><a href="' + document.URL +'download/' + msg + '">' + msg +'</a></p>'
 				$('#messages').append(display_message);
@@ -203,7 +209,7 @@
 				fileReader.readAsDataURL(files[0]);
 				fileReader.onload = function(e) {
 					var uploadIds = uploader.upload(files, {
-						data:nickname
+						data: nickname
 					});
 				}
 			}
@@ -233,7 +239,7 @@
 				});
 			});
 
-			// First step
+			// Step 1: A
 			socket.on('step1', function(msg) {
 				var passA = window.crypto.getRandomValues(new Uint8Array(6)); // random number challenge
 				console.log("Step 1 challenge: ")
@@ -276,7 +282,7 @@
 				});
 			});
 
-			// Step 2
+			// Step 2: B
 			socket.on('step2', function(msg) {
 				combinedArray = new Uint8Array(Object.values(msg));
 				console.log("Message received");
@@ -297,17 +303,17 @@
 								console.log(combinedArray);
 								var message = combinedArray;
 								console.log("Pass A :");
-								var passA = message.slice(0,6); // PassA
+								var passA = message.slice(0, 6); // PassA
 								console.log(passA);
 								console.log("Signed Hash of Ch 1 :");
-								var signature = message.slice(6,262);
+								var signature = message.slice(6, 262);
 								console.log(signature);
 								hashSHA(passA).then((hashed) => { // H(PassA)
 									exportRSA(rsaPublicKey_2).then((exportedPublicRSAKey) => {
 										importRSA_PSS(exportedPublicRSAKey).then((importedPublicRSAKey) => {
-											verifyRSA(importedPublicRSAKey, signature, hashed).then((isvalid) =>{
-												if (isvalid){
-													var passB = window.crypto.getRandomValues(new Uint8Array(6));  // Create random number PassB
+											verifyRSA(importedPublicRSAKey, signature, hashed).then((isvalid) => {
+												if (isvalid) {
+													var passB = window.crypto.getRandomValues(new Uint8Array(6)); // Create random number PassB
 													console.log("Pass B");
 													console.log(passB);
 													var aesKey = new Uint8Array(passA.length + passB.length);
@@ -315,10 +321,15 @@
 													aesKey.set(passB, passA.length); // PassA||PassB
 													console.log("Aes Key:")
 													console.log(aesKey);
-													hashSHA(aesKey).then((hashed) => {  // hash newly created AES Key
-														aesKeyHash = hashed;  // Kab = H(PassA || PassB)
+													hashSHA(aesKey).then((hashed) => { // hash newly created AES Key
+														aesKeyHash = hashed; // Kab = H(PassA || PassB)
 														console.log("Hashed AES Key:")
 														console.log(aesKeyHash)
+														AESEncrypt(aesKeyHash, aesKey).then((result) => {
+															console.log(result[0]);
+															console.log(result[1]);
+															console.log(result[2]);
+														});
 													});
 												}
 											});
@@ -331,9 +342,63 @@
 				});
 			});
 
-			// Step 3
-			socket.on('step3', function(msg){
+			// Step 3: B
+			socket.on('step3', function(msg) {
 
+			});
+
+			// Step 4: A
+			// @TODO
+			// more than 2 splits are prob needed
+			// check lengeths with generated ones in step 3
+			// AES decryption stuff
+
+			socket.on('step4', function(msg) {
+				combinedArray = new Uint8Array(Object.values(msg)); // A,B, { passB, {passB}kab , { H(passB, {passA}kab ) }kb-1 }ka
+				console.log("Message received");
+				console.log(combinedArray);
+				exportPrivateRSA(rsaPrivateKey).then((exportedRSAKey) => {
+					importPrivateRSA_OAEP(exportedRSAKey).then((importedRSAKey) => {
+
+						var splitCombinedArray = combinedArray.slice(0, 256);
+						var splitCombinedArray_2 = combinedArray.slice(256, 512);
+						decryptRSA(importedRSAKey, splitCombinedArray).then((data) => {
+							decryptRSA(importedRSAKey, splitCombinedArray_2).then((data_2) => {
+								var combinedArray = new Uint8Array(data.length + data_2.length); //  passB, {passB}kab , { H(passB, {passA}kab ) }kb-1
+								combinedArray.set(data);
+								combinedArray.set(data_2, data.length);
+								console.log("Unencrypted message :");
+								console.log(combinedArray);
+								var message = combinedArray;
+								console.log("Pass B :");
+								var passB = message.slice(0, 6); // PassB
+								console.log(passB);
+								var aesPassA = message.slice(6, 262); // {passB}kab
+								var signature = message.slice(262, 518);
+								console.log(signature);
+								var combinedArray = new Uint8Array(passB.length + aesPassA.length);
+								combinedArray.set(passB);
+								combinedArray.set(aesPassA);
+								hashSHA(combinedArray).then((hashed) => { // H(PassB, {passA}kab )
+									exportRSA(rsaPublicKey_2).then((exportedPublicRSAKey) => {
+										importRSA_PSS(exportedPublicRSAKey).then((importedPublicRSAKey) => {
+											verifyRSA(importedPublicRSAKey, signature, hashed).then((isvalid) => {
+												if (isvalid) {
+													// decrypt aesPassA check if it matches PassA
+													// generate kab like in step 2
+												}
+
+
+											});
+										});
+									});
+								});
+
+
+							});
+						});
+					});
+				});
 			});
 
 		});
