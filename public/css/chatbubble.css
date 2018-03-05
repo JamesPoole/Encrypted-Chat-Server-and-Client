@@ -252,3 +252,19 @@
   -webkit-margin-before: 0em;
   -webkit-margin-after: 0em;
 }
+.circle {
+  background: #47bc58;
+   border-radius: 0.8em;
+  -moz-border-radius: 0.8em;
+  -webkit-border-radius: 0.8em;
+  color: #ffffff;
+  display: inline-block;
+  font-weight: bold;
+  line-height: 1.6em;
+  text-align: center;
+  width: 1.6em;
+  display: inline-block;
+  vertical-align: top;
+  font-size:35px;
+  margin-top: -30px;
+}
