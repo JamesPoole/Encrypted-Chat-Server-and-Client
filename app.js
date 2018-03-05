@@ -103,7 +103,7 @@ io.on('connection', function(socket) {
  // User uploads a file
  socket.on('file', function(msg) {
   console.log("file uploaded")
-  io.emit('file', 'File Uploaded');
+  io.emit('file', msg);
  });
 
  socket.on('disconnect', function() {

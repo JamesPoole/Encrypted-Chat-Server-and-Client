@@ -110,12 +110,12 @@
 	<script>
 		$(function() {
 			var socket = io();
-			var uploader = new SocketIOFileClient(socket);
+			//var uploader = new SocketIOFileClient(socket);
 			var input = $('#files')[0],
 				fileData;
 
 			// Here for debugging
-			uploader.on('start', function(fileInfo) {
+			/*uploader.on('start', function(fileInfo) {
 				console.log('Start uploading', fileInfo);
 			});
 			uploader.on('stream', function(fileInfo) {
@@ -129,7 +129,7 @@
 			});
 			uploader.on('abort', function(fileInfo) {
 				console.log('Aborted: ', fileInfo);
-			});
+			});*/
 
 			// print not encrypted
 			socket.on('normalMessage', function(msg) {
@@ -186,16 +186,16 @@
 			socket.on('file', function(msg) {
 				console.log(msg);
 				var display_message = "";
-				var incoming_nickname = msg.substr(0, msg.indexOf('$'));
+				//var incoming_nickname = msg.substr(0, msg.indexOf('$'));
 				var current_nickname = $('#nick').val();
-				msg = msg.split('$')[1];
-				console.log(msg)
+				//msg = msg.split('$')[1];
+				//console.log(msg)
 
-				if (incoming_nickname == current_nickname) {
-					display_message = '<div class="removemargin talk-bubble tri-right right-top" style="float:right;"><div class="talktext"><p><a href="' + document.URL + 'download/' + msg + '">' + msg + '</a></p></div></div><div class="clear"></div>'
-				} else {
-					display_message = '<div class="removemargin talk-bubble tri-right left-top"><div class="talktext"><p><a href="' + document.URL + 'download/' + msg + '">' + msg + '</a></p></div></div><div class="clear"></div>'
-				}
+				//if (incoming_nickname == current_nickname) {
+					//display_message = '<div class="removemargin talk-bubble tri-right right-top" style="float:right;"><div class="talktext"><p><a href="' + document.URL + 'download/' + msg + '">' + msg + '</a></p></div></div><div class="clear"></div>'
+				//} else {
+					display_message = '<div class="removemargin talk-bubble tri-right left-top"><div class="talktext"><p><a class="download" href="' + msg + '" download="file5">file1</a></p></div></div><div class="clear"></div>'
+				//}
 				//display_message = '<p><a href="' + document.URL +'download/' + msg + '">' + msg +'</a></p>'
 				$('#messages').append(display_message);
 				$("#messages").scrollTop($("#messages")[0].scrollHeight);
@@ -208,9 +208,11 @@
 				var fileReader = new FileReader();
 				fileReader.readAsDataURL(files[0]);
 				fileReader.onload = function(e) {
-					var uploadIds = uploader.upload(files, {
-						data: nickname
-					});
+					socket.emit('file', e.target.result);
+					//console.log(e.target.result);
+					//var uploadIds = uploader.upload(files, {
+						//data: nickname
+					//});
 				}
 			}
 			// Eventlistener for file input.
