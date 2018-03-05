@@ -61,6 +61,7 @@
 	<div class="section">
 		<div class="chat">
 			<div id="messages" style="overflow:auto; height:400px; padding-top:10px">
+				<img id="image" style="width: 300px; " />
 			</div>
 		</div>
 	</div>
@@ -199,6 +200,85 @@
 				//display_message = '<p><a href="' + document.URL +'download/' + msg + '">' + msg +'</a></p>'
 				$('#messages').append(display_message);
 				$("#messages").scrollTop($("#messages")[0].scrollHeight);
+
+
+
+				// var saveData = (function() {
+				// 	var a = document.createElement("a");
+				// 	document.body.appendChild(a);
+				// 	a.style = "display: none";
+				// 	return function(data, fileName) {
+				// 		var json = JSON.stringify(data),
+				// 			blob = new Blob([json], {
+				// 				type: "plain/text"
+				// 			}),
+				// 			url = window.URL.createObjectURL(blob);
+				// 		a.href = url;
+				// 		a.download = fileName;
+				// 		a.click();
+				// 		window.URL.revokeObjectURL(url);
+				// 	};
+				// }());
+				//
+				// saveData(img, msg);
+
+				var xhr = new XMLHttpRequest();
+				xhr.open("GET", document.URL + 'download/' + msg);
+				xhr.responseType = "blob";
+				xhr.onload = response;
+				xhr.send();
+
+				function response(e) {
+					file = this.response;
+					console.log(file);
+					var chunkSize = 10256;
+
+					var arrayBuffer;
+					var fileReader = new FileReader();
+
+					fileReader.onload = function() {
+						arrayBuffer = this.result;
+						console.log(arrayBuffer);
+						for (var sent = 0; sent < file.size; sent = sent + chunkSize) {
+							var chunk = arrayBuffer.slice(sent, sent + chunkSize);
+							console.log("chunk downloading: ");
+							console.log(chunk);
+							decryptFileAES(fileAESKey, encryptedChunk, FileIV).then((newChunk) => {
+								console.log("unencrypted download chunk: ");
+								console.log(newChunk);
+								// var combinedArray = new Uint8Array(data.length + data_2.length); // { passA,{ H(passA) }ka-1 }kb
+								// combinedArray.set(data);
+								// combinedArray.set(data_2, data.length);
+							});
+						}
+					};
+
+					fileReader.readAsArrayBuffer(file);
+
+
+
+					var urlCreator = window.URL || window.webkitURL;
+					var imageUrl = urlCreator.createObjectURL(file);
+					document.querySelector("#image").src = imageUrl;
+				}
+
+
+				// if ($('#encryptChat').is(":checked")) {
+				// 	for (var i = 0; i < array.length; i++) {
+				// 		array[i]
+				// 	}
+				// 	chunkSize = 1024;
+				// 	var chunk = buffer.slice(fileInfo.sent, fileInfo.sent + chunkSize);
+				// 	console.log("write function chunk: ");
+				// 	console.log(chunk);
+				// 	decryptFileAES(key, encryptedChunk, FileIV).then((newChunk) => {
+				// 		// console.log(encryptedChunk);
+				//
+				//
+				//
+				// 	});
+				// }
+
 			});
 
 			// Eventhandler for file input.

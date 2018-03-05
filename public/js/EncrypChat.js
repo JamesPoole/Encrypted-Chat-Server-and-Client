@@ -238,83 +238,142 @@ function generateAES() {
   });
 }
 
-function AESEncrypt(key, data) {
- var generatedIv = window.crypto.getRandomValues(new Uint8Array(12));
- return window.crypto.subtle.encrypt({
-    name: "AES-GCM",
-
-    //Don't re-use initialization vectors!
-    //Always generate a new iv every time your encrypt!
-    //Recommended to use 12 bytes length
-    iv: generatedIv,
-
-    //Additional authentication data (optional)
-    // additionalData: ArrayBuffer,
-
-    //Tag length (optional)
-    tagLength: 128, //can be 32, 64, 96, 104, 112, 120 or 128 (default)
-   },
-   key, //from generateKey or importKey above
-   data //ArrayBuffer of data you want to encrypt
+function exportAES(key) {
+ return window.crypto.subtle.exportKey(
+   "raw", //can be "jwk" or "raw"
+   key //extractable must be true
   )
-  .then(function(encrypted) {
-   //returns an ArrayBuffer containing the encrypted data
-   var data = new Uint8Array(encrypted);
-   return [key, data, generatedIv];
+  .then(function(keydata) {
+   //returns the exported key data
+   // console.log(keydata);
+   return keydata;
   })
   .catch(function(err) {
    console.error(err);
   });
-}
 
-function AESDecrypt(key, data, generatedIv) {
- return window.crypto.subtle.decrypt({
-    name: "AES-GCM",
-    iv: generatedIv, //The initialization vector you used to encrypt
-    //additionalData: ArrayBuffer, //The addtionalData you used to encrypt (if any)
-    tagLength: 128, //The tagLength you used to encrypt (if any)
-   },
-   key, //from generateKey or importKey above
-   data //ArrayBuffer of the data
-  )
-  .then(function(decrypted) {
-   //returns an ArrayBuffer containing the decrypted data
-   var data = new Uint8Array(decrypted);
-   return data
-  })
-  .catch(function(err) {
-   console.error(err);
-  });
-}
+ function encryptAES(key, data, iv) {
+  return window.crypto.subtle.encrypt({
+     name: "AES-GCM",
 
-// RSA Keys
-var rsaPublicKey; // My public
-var rsaPrivateKey; // my private
-var rsaPublicKey_2; // Other users public key
-var aesKeyHash;
+     //Don't re-use initialization vectors!
+     //Always generate a new iv every time your encrypt!
+     //Recommended to use 12 bytes length
+     iv: iv,
+
+     //Additional authentication data (optional)
+     // additionalData: ArrayBuffer,
+
+     //Tag length (optional)
+     tagLength: 128, //can be 32, 64, 96, 104, 112, 120 or 128 (default)
+    },
+    key, //from generateKey or importKey above
+    data //ArrayBuffer of data you want to encrypt
+   )
+   .then(function(encrypted) {
+    //returns an ArrayBuffer containing the encrypted data
+    var data = new Uint8Array(encrypted);
+    return encrypted;
+   })
+   .catch(function(err) {
+    console.error(err);
+   });
+ }
+
+ function encryptFileAES(key, data, iv) {
+  return window.crypto.subtle.encrypt({
+     name: "AES-GCM",
+
+     //Don't re-use initialization vectors!
+     //Always generate a new iv every time your encrypt!
+     //Recommended to use 12 bytes length
+     iv: iv,
+
+     //Additional authentication data (optional)
+     // additionalData: ArrayBuffer,
+
+     //Tag length (optional)
+     tagLength: 128, //can be 32, 64, 96, 104, 112, 120 or 128 (default)
+    },
+    key, //from generateKey or importKey above
+    data //ArrayBuffer of data you want to encrypt
+   )
+   .then(function(encrypted) {
+    //returns an ArrayBuffer containing the encrypted data
+    return encrypted;
+   })
+   .catch(function(err) {
+    console.error(err);
+   });
+ }
+
+ function decryptFileAES(key, data, iv) {
+  return window.crypto.subtle.decrypt({
+     name: "AES-GCM",
+     iv: iv, //The initialization vector you used to encrypt
+     //additionalData: ArrayBuffer, //The addtionalData you used to encrypt (if any)
+     tagLength: 128, //The tagLength you used to encrypt (if any)
+    },
+    key, //from generateKey or importKey above
+    data //ArrayBuffer of the data
+   )
+   .then(function(decrypted) {
+    //returns an ArrayBuffer containing the decrypted data
+    return decrypted
+   })
+   .catch(function(err) {
+    console.error(err);
+   });
+ }
+
+ function decryptAES(key, data, iv) {
+  return window.crypto.subtle.decrypt({
+     name: "AES-GCM",
+     iv: iv, //The initialization vector you used to encrypt
+     //additionalData: ArrayBuffer, //The addtionalData you used to encrypt (if any)
+     tagLength: 128, //The tagLength you used to encrypt (if any)
+    },
+    key, //from generateKey or importKey above
+    data //ArrayBuffer of the data
+   )
+   .then(function(decrypted) {
+    //returns an ArrayBuffer containing the decrypted data
+    var data = new Uint8Array(decrypted);
+    return data
+   })
+   .catch(function(err) {
+    console.error(err);
+   });
+ }
+
+ // RSA Keys
+ var rsaPublicKey; // My public
+ var rsaPrivateKey; // my private
+ var rsaPublicKey_2; // Other users public key
+ var aesKeyHash;
 
 
-//AES
-// var aesKey;
-// generateAES().then((res) => {
-//  aesKey = res;
-//  // console.log(aesKey);
-//  var buffer = new ArrayBuffer(100);
-//  // console.log(buffer);
-//
-//  AESEncrypt(aesKey, buffer).then((res) => {
-//   aesKey = res[0];
-//   var encryptedData = res[1];
-//   var generatedIv = res[2];
-//   // console.log(encryptedData);
-//
-//   AESDecrypt(aesKey, encryptedData, generatedIv).then((res) => {
-//    var data = res;
-//    // console.log(data);
-//   });
-//  });
-// });
+ //AES
+ // var aesKey;
+ // generateAES().then((res) => {
+ //  aesKey = res;
+ //  // console.log(aesKey);
+ //  var buffer = new ArrayBuffer(100);
+ //  // console.log(buffer);
+ //
+ //  AESEncrypt(aesKey, buffer).then((res) => {
+ //   aesKey = res[0];
+ //   var encryptedData = res[1];
+ //   var generatedIv = res[2];
+ //   // console.log(encryptedData);
+ //
+ //   AESDecrypt(aesKey, encryptedData, generatedIv).then((res) => {
+ //    var data = res;
+ //    // console.log(data);
+ //   });
+ //  });
+ // });
 
-$(function() {
- // would like to put protocol here but it cant find socketio. @TODO
-});
+ $(function() {
+  // would like to put protocol here but it cant find socketio. @TODO
+ });
