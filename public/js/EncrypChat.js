@@ -238,15 +238,34 @@ function generateAES() {
   });
 }
 
-function AESEncrypt(key, data) {
- var generatedIv = window.crypto.getRandomValues(new Uint8Array(12));
+function importAES(aesKeyHash, iv) {
+  return window.crypto.subtle.importKey(
+      "raw", //can be "jwk" or "raw"
+      aesKeyHash,
+      {   //this is the algorithm options
+          name: "AES-GCM",
+          iv: iv
+      },
+      false, //whether the key is extractable (i.e. can be used in exportKey)
+      ["encrypt", "decrypt"] //can "encrypt", "decrypt", "wrapKey", or "unwrapKey"
+  )
+  .then(function(key){
+      //returns the symmetric key
+      return key;
+  })
+  .catch(function(err){
+      console.error(err);
+  });
+}
+
+function encryptAES(key, iv, data) {
  return window.crypto.subtle.encrypt({
     name: "AES-GCM",
 
     //Don't re-use initialization vectors!
     //Always generate a new iv every time your encrypt!
     //Recommended to use 12 bytes length
-    iv: generatedIv,
+    iv: iv,
 
     //Additional authentication data (optional)
     // additionalData: ArrayBuffer,
@@ -260,17 +279,17 @@ function AESEncrypt(key, data) {
   .then(function(encrypted) {
    //returns an ArrayBuffer containing the encrypted data
    var data = new Uint8Array(encrypted);
-   return [key, data, generatedIv];
+   return data;
   })
   .catch(function(err) {
    console.error(err);
   });
 }
 
-function AESDecrypt(key, data, generatedIv) {
+function decryptAES(key, data, iv) {
  return window.crypto.subtle.decrypt({
     name: "AES-GCM",
-    iv: generatedIv, //The initialization vector you used to encrypt
+    iv: iv, //The initialization vector you used to encrypt
     //additionalData: ArrayBuffer, //The addtionalData you used to encrypt (if any)
     tagLength: 128, //The tagLength you used to encrypt (if any)
    },
