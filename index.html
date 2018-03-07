@@ -43,7 +43,6 @@
 <body>
 	<nav class="purple lighten-1" role="navigation">
 		<div class="nav-wrapper row" style="margin-left:5px"><a id="logo-container" href="#" class="brand-logo">EncrypChat</a>
-			<a href="#" data-target="nav-mobile" class="sidenav-trigger"><i class="material-icons">menu</i></a>
 		</div>
 	</nav>
 	<div class="row">
@@ -60,7 +59,7 @@
 	</div>
 	<div class="section">
 		<div class="chat">
-			<div id="messages" style="overflow:auto; height:700px; padding-top:30px; margin-left:5px; margin-right:5px">
+			<div id="messages" style="overflow:auto; height:75vh; padding-top:30px; margin-left:5px; margin-right:5px">
 				<!--<img id="image" style="width: 300px; " />-->
 			</div>
 		</div>
@@ -70,15 +69,13 @@
 			<div class="input-field col s2">
 				<input placeholder="Nickname" id="nick" type="text" class="validate">
 			</div>
-			<div class="input-field col s8" style=" display:flex;">
+			<div class="input-field col s9" style=" display:flex;">
 				<input placeholder="Write a message..." id="m" type="text" class="validate">
 			</div>
 			<div class="col s1">
 				<button class="btn-floating btn-large waves-effect waves-light purple" style="margin-top:5px" type="submit" name="action">
 					<i class="material-icons">send</i>
 				</button>
-			</div>
-			<div class="col s1">
 				<input type='file' id="files" hidden/>
 				<button class="btn-floating btn-large waves-effect waves-light purple" id="upload" style="margin-top:5px">
 						<i class="material-icons">attach_file</i>
