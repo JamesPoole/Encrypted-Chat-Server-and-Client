@@ -120,16 +120,16 @@
 				console.log('Start uploading', fileInfo);
 			});
 			uploader.on('stream', function(fileInfo) {
-				console.log('Streaming... sent ' + fileInfo.sent + ' bytes.');
+				// console.log('Streaming... sent ' + fileInfo.sent + ' bytes.');
 			});
 			uploader.on('complete', function(fileInfo) {
-				console.log('Upload Complete', fileInfo);
+				// console.log('Upload Complete', fileInfo);
 			});
 			uploader.on('error', function(err) {
-				console.log('Error!', err);
+				// console.log('Error!', err);
 			});
 			uploader.on('abort', function(fileInfo) {
-				console.log('Aborted: ', fileInfo);
+				// console.log('Aborted: ', fileInfo);
 			});
 
 			// print not encrypted
@@ -185,12 +185,12 @@
 
 			// Get file url that was sent
 			socket.on('file', function(msg) {
-				console.log(msg);
+				// console.log(msg);
 				var display_message = "";
 				var incoming_nickname = msg.substr(0, msg.indexOf('$'));
 				var current_nickname = $('#nick').val();
 				msg = msg.split('$')[1];
-				console.log(msg)
+				// console.log(msg)
 
 				if (incoming_nickname == current_nickname) {
 					display_message = '<div class="removemargin talk-bubble tri-right right-top" style="float:right;"><div class="talktext"><p><a href="' + document.URL + 'download/' + msg + '">' + msg + '</a></p></div></div><div class="clear"></div>'
@@ -203,24 +203,23 @@
 
 
 
-				// var saveData = (function() {
-				// 	var a = document.createElement("a");
-				// 	document.body.appendChild(a);
-				// 	a.style = "display: none";
-				// 	return function(data, fileName) {
-				// 		var json = JSON.stringify(data),
-				// 			blob = new Blob([json], {
-				// 				type: "plain/text"
-				// 			}),
-				// 			url = window.URL.createObjectURL(blob);
-				// 		a.href = url;
-				// 		a.download = fileName;
-				// 		a.click();
-				// 		window.URL.revokeObjectURL(url);
-				// 	};
-				// }());
-				//
-				// saveData(img, msg);
+				var saveData = (function() {
+					var a = document.createElement("a");
+					document.body.appendChild(a);
+					a.style = "display: none";
+					return function(data, fileName) {
+						// var json = JSON.stringify(data),
+						// 	blob = new Blob([json], {
+						// 		type: "image/png"
+						// 	}),
+							url = window.URL.createObjectURL(data);
+						a.href = url;
+						a.download = fileName;
+						a.click();
+						window.URL.revokeObjectURL(url);
+					};
+				}());
+
 
 				var xhr = new XMLHttpRequest();
 				xhr.open("GET", document.URL + 'download/' + msg);
@@ -231,54 +230,77 @@
 				function response(e) {
 					file = this.response;
 					console.log(file);
-					var chunkSize = 10256;
 
-					var arrayBuffer;
-					var fileReader = new FileReader();
+					// if chat is encrypted decrypt the file
+					if ($('#encryptChat').is(":checked")) {
+						var fileReader = new FileReader();
 
-					fileReader.onload = function() {
-						arrayBuffer = this.result;
-						console.log(arrayBuffer);
-						for (var sent = 0; sent < file.size; sent = sent + chunkSize) {
-							var chunk = arrayBuffer.slice(sent, sent + chunkSize);
-							console.log("chunk downloading: ");
-							console.log(chunk);
-							decryptFileAES(fileAESKey, encryptedChunk, FileIV).then((newChunk) => {
-								console.log("unencrypted download chunk: ");
+
+						fileReader.onload = async function() {
+							var chunkSize = 10240;
+							var enChunkSize = 10256;
+							// var combinedArray = new ArrayBuffer(file.size - 16);
+							var cA1, cA2, cA3, cA4, cA5, cA6;
+							var i = 0;
+							var arrayBuffer = this.result;
+							var key = await window.crypto.subtle.importKey("raw", fileAESKey, {
+									name: "AES-GCM",
+									iv: fileIv
+								},
+								true, ["encrypt", "decrypt"]
+							);
+							// console.log(key);
+							// console.log(arrayBuffer);
+							// console.log(file.size);
+							for (var sent = 0; sent < file.size; sent = sent + enChunkSize) {
+								var encryptedChunk = await arrayBuffer.slice(sent, sent + enChunkSize);
+								// console.log("chunk downloading: ");
+								// console.log(encryptedChunk);
+								// console.log(sent);
+								var newChunk = await window.crypto.subtle.decrypt({
+									name: "AES-GCM",
+									iv: fileIv,
+									tagLength: 128,
+								}, key, encryptedChunk).catch(function(err) {
+									console.error(err);
+								});
 								console.log(newChunk);
-								// var combinedArray = new Uint8Array(data.length + data_2.length); // { passA,{ H(passA) }ka-1 }kb
-								// combinedArray.set(data);
-								// combinedArray.set(data_2, data.length);
+								console.log(i);
+								if (i == 0) {
+									cA1 = newChunk;
+								} else if (i == 1) {
+									cA2 = newChunk;
+								} else if (i == 2) {
+									cA3 = newChunk;
+								} else if (i == 3) {
+									cA4 = newChunk;
+								} else if (i == 4) {
+									cA5 = newChunk;
+								} else if (i == 5) {
+									cA6 = newChunk;
+								}
+								i++;
+								// var enc = new TextDecoder();
+								// console.log(enc.decode(newChunk));
+							}
+							console.log(cA1);
+							console.log(cA6);
+							var blob = new Blob([cA1, cA2, cA3, cA4, cA5, cA6], {
+								type: "image/png"
 							});
-						}
-					};
+							console.log(blob);
+							saveData(blob, msg);
 
-					fileReader.readAsArrayBuffer(file);
+						};
 
-
-
-					var urlCreator = window.URL || window.webkitURL;
-					var imageUrl = urlCreator.createObjectURL(file);
-					document.querySelector("#image").src = imageUrl;
+						fileReader.readAsArrayBuffer(file);
+					} else {
+						// show image in chat box
+						var urlCreator = window.URL || window.webkitURL;
+						var imageUrl = urlCreator.createObjectURL(file);
+						document.querySelector("#image").src = imageUrl;
+					}
 				}
-
-
-				// if ($('#encryptChat').is(":checked")) {
-				// 	for (var i = 0; i < array.length; i++) {
-				// 		array[i]
-				// 	}
-				// 	chunkSize = 1024;
-				// 	var chunk = buffer.slice(fileInfo.sent, fileInfo.sent + chunkSize);
-				// 	console.log("write function chunk: ");
-				// 	console.log(chunk);
-				// 	decryptFileAES(key, encryptedChunk, FileIV).then((newChunk) => {
-				// 		// console.log(encryptedChunk);
-				//
-				//
-				//
-				// 	});
-				// }
-
 			});
 
 			// Eventhandler for file input.

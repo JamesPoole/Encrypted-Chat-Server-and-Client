@@ -13,12 +13,12 @@ app.get('/', function(req, res) {
 app.use(express.static(__dirname + '/public'));
 
 app.get('/socket.io-file-client.js', (req, res, next) => {
-    return res.sendFile(__dirname + '/node_modules/socket.io-file-client/socket.io-file-client.js');
+ return res.sendFile(__dirname + '/node_modules/socket.io-file-client/socket.io-file-client.js');
 });
 
-app.get('/download/:path', function(req, res){
-  var file = __dirname + '/data/' + req.params.path;
-  res.download(file); // Set disposition and send it.
+app.get('/download/:path', function(req, res) {
+ var file = __dirname + '/data/' + req.params.path;
+ res.download(file); // Set disposition and send it.
 });
 
 http.listen(3000, "0.0.0.0", function() {
@@ -33,30 +33,30 @@ io.on('connection', function(socket) {
  }
 
  var uploader = new SocketIOFile(socket, {
-   uploadDir: 'data',
-   chunkSize: 10240,
-   transmissionDelay: 0,
-   overwrite: true
+  uploadDir: 'data',
+  chunkSize: 10240,
+  transmissionDelay: 0,
+  overwrite: true
  });
 
-    uploader.on('start', (fileInfo) => {
-        console.log('Start uploading');
-        console.log(fileInfo);
-    });
-    uploader.on('stream', (fileInfo) => {
-        console.log(`${fileInfo.wrote} / ${fileInfo.size} byte(s)`);
-    });
-    uploader.on('complete', (fileInfo) => {
-        console.log('Upload Complete.');
-        console.log(fileInfo.name);
-        io.emit('file', fileInfo.data + '$' + fileInfo.name);
-    });
-    uploader.on('error', (err) => {
-        console.log('Error!', err);
-    });
-    uploader.on('abort', (fileInfo) => {
-        console.log('Aborted: ', fileInfo);
-    });
+ uploader.on('start', (fileInfo) => {
+  console.log('Start uploading');
+  console.log(fileInfo);
+ });
+ uploader.on('stream', (fileInfo) => {
+  console.log(`${fileInfo.wrote} / ${fileInfo.size} byte(s)`);
+ });
+ uploader.on('complete', (fileInfo) => {
+  console.log('Upload Complete.');
+  console.log(fileInfo.name);
+  io.emit('file', fileInfo.data + '$' + fileInfo.name);
+ });
+ uploader.on('error', (err) => {
+  console.log('Error!', err);
+ });
+ uploader.on('abort', (fileInfo) => {
+  console.log('Aborted: ', fileInfo);
+ });
 
  // send normal message to everyone
  socket.on('normalMessage', function(msg) {
