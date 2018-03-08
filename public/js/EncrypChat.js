@@ -150,9 +150,9 @@ function signRSA(privateKey, data) {
   )
   .then(function(signature) {
    //returns an ArrayBuffer containing the signature
-   var data = new Uint8Array(signature);
+   var signatureArray = new Uint8Array(signature);
    //console.log();
-   return data;
+   return signatureArray;
   })
   .catch(function(err) {
    console.error(err);
@@ -270,6 +270,7 @@ function exportAES(key) {
   .catch(function(err) {
    console.error(err);
   });
+}
 
  function encryptAES(key, iv, data) {
   return window.crypto.subtle.encrypt({
@@ -296,7 +297,7 @@ function exportAES(key) {
    })
    .catch(function(err) {
     console.error(err);
-   });
+  });
  }
 
  function decryptAES(key, data, iv) {
@@ -371,7 +372,3 @@ function exportAES(key) {
  var rsaPrivateKey; // my private
  var rsaPublicKey_2; // Other users public key
  var aesKeyHash;
-
- $(function() {
-  // would like to put protocol here but it cant find socketio. @TODO
- });

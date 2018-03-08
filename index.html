@@ -405,13 +405,9 @@
 													console.log(aesKey);
 													hashSHA(aesKey).then((hashed) => { // hash newly created AES Key
 														aesKeyHash = hashed; // Kab = H(PassA || PassB)
-														console.log("Hashed AES Key:")
-														console.log(aesKeyHash)
-														AESEncrypt(aesKeyHash, aesKey).then((result) => {
-															console.log(result[0]);
-															console.log(result[1]);
-															console.log(result[2]);
-														});
+														console.log("Hashed AES Key:");
+														console.log(aesKeyHash);
+														step3(passA, passB, aesKeyHash);
 													});
 												}
 											});
@@ -425,9 +421,40 @@
 			});
 
 			// Step 3: B
-			socket.on('step3', function(msg) {
+			function step3(passA, passB, aesKeyHash){
+				const iv = crypto.getRandomValues(new Uint8Array(12));
+				importAES(aesKeyHash, iv).then((Kab) => { //Kab key object
+					encryptAES(Kab, iv, passA).then((encryptedPassA) => { //{PassA}Kab
+						var combinedArray = new Uint8Array(passB.length + encryptedPassA.length);
+						combinedArray.set(passB);
+						combinedArray.set(encryptedPassA, passB.length);
+						hashSHA(combinedArray).then((hashed) => { // H(PassB,{PassA}Kab)
+							signRSA(rsaPrivateKey, hashed).then((signedHash) => { //{H(PassB,{PassA}Kab)}Kb-1
+								var combinedArray = new Uint8Array(passB.length + encryptedPassA.length + signedHash.length);
+								combinedArray.set(passB);
+								combinedArray.set(encryptedPassA, passB.length);
+								combinedArray.set(signedHash, passB.length + encryptedPassA.length);
+								var splitCombinedArray = combinedArray.slice(0,190);
+								var splitCombinedArray_2 = combinedArray.slice(190, combinedArray.length);
+								exportRSA(rsaPublicKey).then((exportedPublicRSAKey) => {
+									importRSA_OAEP(exportedPublicRSAKey).then((importedPublicOAEPKey) => {
+										encryptRSA(importedPublicOAEPKey, splitCombinedArray).then((encryptedData) => { //{PassB, {PassA}Kab,{H(PassB,{PassA}Kab)}kb-1}Ka
+											encryptRSA(importedPublicOAEPKey, splitCombinedArray_2).then((encryptedData_2) => {
+												var newCombinedArray = new Uint8Array(encryptedData.length + encryptedData_2.length);
+												newCombinedArray.set(encryptedData);
+												newCombinedArray.set(encryptedData_2, encryptedData.length);
 
-			});
+												console.log("encrypted Data");
+												console.log(newCombinedArray);
+											});
+										});
+									});
+								});
+							});
+						});
+					});
+				});
+			}
 
 			// Step 4: A
 			// @TODO
