@@ -238,14 +238,14 @@ function generateAES() {
   });
 }
 
-function importAES(aesKeyHash, iv) {
+async function importAES(aesKeyHash, iv) {
  return window.crypto.subtle.importKey(
    "raw", //can be "jwk" or "raw"
    aesKeyHash, { //this is the algorithm options
     name: "AES-GCM",
     iv: iv
    },
-   false, //whether the key is extractable (i.e. can be used in exportKey)
+   true, //whether the key is extractable (i.e. can be used in exportKey)
    ["encrypt", "decrypt"] //can "encrypt", "decrypt", "wrapKey", or "unwrapKey"
   )
   .then(function(key) {
@@ -272,17 +272,17 @@ function exportAES(key) {
   });
 }
 
- function encryptAES(key, iv, data) {
-  return window.crypto.subtle.encrypt({
-     name: "AES-GCM",
+function encryptAES(key, iv, data) {
+ return window.crypto.subtle.encrypt({
+    name: "AES-GCM",
 
-     //Don't re-use initialization vectors!
-     //Always generate a new iv every time your encrypt!
-     //Recommended to use 12 bytes length
-     iv: iv,
+    //Don't re-use initialization vectors!
+    //Always generate a new iv every time your encrypt!
+    //Recommended to use 12 bytes length
+    iv: iv,
 
-     //Additional authentication data (optional)
-     // additionalData: ArrayBuffer,
+    //Additional authentication data (optional)
+    // additionalData: ArrayBuffer,
 
      //Tag length (optional)
      tagLength: 128, //can be 32, 64, 96, 104, 112, 120 or 128 (default)
@@ -300,75 +300,81 @@ function exportAES(key) {
   });
  }
 
- function decryptAES(key, data, iv) {
-  return window.crypto.subtle.decrypt({
-     name: "AES-GCM",
-     iv: iv, //The initialization vector you used to encrypt
-     //additionalData: ArrayBuffer, //The addtionalData you used to encrypt (if any)
-     tagLength: 128, //The tagLength you used to encrypt (if any)
-    },
-    key, //from generateKey or importKey above
-    data //ArrayBuffer of the data
-   )
-   .then(function(decrypted) {
-    //returns an ArrayBuffer containing the decrypted data
-    var data = new Uint8Array(decrypted);
-    return data
-   })
-   .catch(function(err) {
-    console.error(err);
-   });
- }
+function decryptAES(key, data, iv) {
+ return window.crypto.subtle.decrypt({
+    name: "AES-GCM",
+    iv: iv, //The initialization vector you used to encrypt
+    //additionalData: ArrayBuffer, //The addtionalData you used to encrypt (if any)
+    tagLength: 128, //The tagLength you used to encrypt (if any)
+   },
+   key, //from generateKey or importKey above
+   data //ArrayBuffer of the data
+  )
+  .then(function(decrypted) {
+   //returns an ArrayBuffer containing the decrypted data
+   var data = new Uint8Array(decrypted);
+   return data
+  })
+  .catch(function(err) {
+   console.error(err);
+  });
+}
 
- function encryptFileAES(key, data, iv) {
-  return window.crypto.subtle.encrypt({
-     name: "AES-GCM",
+function encryptFileAES(key, data, iv) {
+ return window.crypto.subtle.encrypt({
+    name: "AES-GCM",
 
-     //Don't re-use initialization vectors!
-     //Always generate a new iv every time your encrypt!
-     //Recommended to use 12 bytes length
-     iv: iv,
+    //Don't re-use initialization vectors!
+    //Always generate a new iv every time your encrypt!
+    //Recommended to use 12 bytes length
+    iv: iv,
 
-     //Additional authentication data (optional)
-     // additionalData: ArrayBuffer,
+    //Additional authentication data (optional)
+    // additionalData: ArrayBuffer,
 
-     //Tag length (optional)
-     tagLength: 128, //can be 32, 64, 96, 104, 112, 120 or 128 (default)
-    },
-    key, //from generateKey or importKey above
-    data //ArrayBuffer of data you want to encrypt
-   )
-   .then(function(encrypted) {
-    //returns an ArrayBuffer containing the encrypted data
-    return encrypted;
-   })
-   .catch(function(err) {
-    console.error(err);
-   });
- }
+    //Tag length (optional)
+    tagLength: 128, //can be 32, 64, 96, 104, 112, 120 or 128 (default)
+   },
+   key, //from generateKey or importKey above
+   data //ArrayBuffer of data you want to encrypt
+  )
+  .then(function(encrypted) {
+   //returns an ArrayBuffer containing the encrypted data
+   return encrypted;
+  })
+  .catch(function(err) {
+   console.error(err);
+  });
+}
 
- function decryptFileAES(key, data, iv) {
-  return window.crypto.subtle.decrypt({
-     name: "AES-GCM",
-     iv: iv, //The initialization vector you used to encrypt
-     //additionalData: ArrayBuffer, //The addtionalData you used to encrypt (if any)
-     tagLength: 128, //The tagLength you used to encrypt (if any)
-    },
-    key, //from generateKey or importKey above
-    data //ArrayBuffer of the data
-   )
-   .then(function(decrypted) {
-    //returns an ArrayBuffer containing the decrypted data
-    return decrypted
-   })
-   .catch(function(err) {
-    console.error(err);
-   });
- }
+async function decryptFileAES(key, data, iv) {
+ return window.crypto.subtle.decrypt({
+    name: "AES-GCM",
+    iv: iv, //The initialization vector you used to encrypt
+    //additionalData: ArrayBuffer, //The addtionalData you used to encrypt (if any)
+    tagLength: 128, //The tagLength you used to encrypt (if any)
+   },
+   key, //from generateKey or importKey above
+   data //ArrayBuffer of the data
+  )
+  .then(function(decrypted) {
+   //returns an ArrayBuffer containing the decrypted data
+   return decrypted
+  })
+  .catch(function(err) {
+   console.error(err);
+  });
+}
 
 
- // RSA Keys
- var rsaPublicKey; // My public
- var rsaPrivateKey; // my private
- var rsaPublicKey_2; // Other users public key
- var aesKeyHash;
+// RSA Keys
+var rsaPublicKey; // My public
+var rsaPrivateKey; // my private
+var rsaPublicKey_2; // Other users public key
+var aesKeyHash;
+var fileAESKey;
+var fileIv;
+
+$(function() {
+ // would like to put protocol here but it cant find socketio. @TODO
+});
