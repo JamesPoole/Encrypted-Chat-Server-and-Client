@@ -185,22 +185,23 @@
 			// Get file url that was sent
 			socket.on('file', function(msg) {
 				console.log(msg);
-				var display_message = "";
+				var append_string = "";
+				var file_message = "";
 				var incoming_nickname = msg.substr(0, msg.indexOf('$'));
+				var first_letter_nickname = msg.charAt(0);
 				var current_nickname = $('#nick').val();
 				msg = msg.split('$')[1];
+				file_message = msg.substring(0,16) + "...";
 				console.log(msg)
 
 				if (incoming_nickname == current_nickname) {
-					display_message = '<div class="removemargin talk-bubble tri-right right-top" style="float:right;"><div class="talktext"><p><a href="' + document.URL + 'download/' + msg + '">' + msg + '</a></p></div></div><div class="clear"></div>'
+					append_string = '<div style="float:right;"><div class="removemargin talk-bubble tri-right right-top"><div class="talktext"><p><a href="' + document.URL + 'download/' + msg + '">' + file_message + '</a></p></div></div><div class="circle">' + first_letter_nickname + '</div></div><div class="clear"></div>'
 				} else {
-					display_message = '<div class="removemargin talk-bubble tri-right left-top"><div class="talktext"><p><a href="' + document.URL + 'download/' + msg + '">' + msg + '</a></p></div></div><div class="clear"></div>'
+					append_string = '<div class="circle">' + first_letter_nickname + '</div><div class="removemargin talk-bubble tri-right left-top"><div class="talktext"><p><a href="' + document.URL + 'download/' + msg + '">' + file_message + '</a></p></div></div><div class="clear"></div>'
 				}
 				//display_message = '<p><a href="' + document.URL +'download/' + msg + '">' + msg +'</a></p>'
-				$('#messages').append(display_message);
+				$('#messages').append(append_string);
 				$("#messages").scrollTop($("#messages")[0].scrollHeight);
-
-
 
 				// var saveData = (function() {
 				// 	var a = document.createElement("a");
