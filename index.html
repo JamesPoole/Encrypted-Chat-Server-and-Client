@@ -61,7 +61,6 @@
 	<div class="section">
 		<div class="chat">
 			<div id="messages" style="overflow:auto; height:400px; padding-top:10px">
-				<img id="image" style="width: 300px; " />
 			</div>
 		</div>
 	</div>
@@ -208,11 +207,7 @@
 					document.body.appendChild(a);
 					a.style = "display: none";
 					return function(data, fileName) {
-						// var json = JSON.stringify(data),
-						// 	blob = new Blob([json], {
-						// 		type: "image/png"
-						// 	}),
-							url = window.URL.createObjectURL(data);
+						url = window.URL.createObjectURL(data);
 						a.href = url;
 						a.download = fileName;
 						a.click();
@@ -239,8 +234,7 @@
 						fileReader.onload = async function() {
 							var chunkSize = 10240;
 							var enChunkSize = 10256;
-							// var combinedArray = new ArrayBuffer(file.size - 16);
-							var cA1, cA2, cA3, cA4, cA5, cA6;
+							var cA1, cA2, cA3, cA4, cA5, cA6, cA7, cA8, cA9, cA10, cA11, cA12, cA13, cA14, cA15, cA16, cA17, cA18, cA19, cA20, cA21; // upto 215 KB file
 							var i = 0;
 							var arrayBuffer = this.result;
 							var key = await window.crypto.subtle.importKey("raw", fileAESKey, {
@@ -264,8 +258,9 @@
 								}, key, encryptedChunk).catch(function(err) {
 									console.error(err);
 								});
-								console.log(newChunk);
-								console.log(i);
+								// console.log(newChunk);
+
+								// console.log(i);
 								if (i == 0) {
 									cA1 = newChunk;
 								} else if (i == 1) {
@@ -278,15 +273,41 @@
 									cA5 = newChunk;
 								} else if (i == 5) {
 									cA6 = newChunk;
+								} else if (i == 6) {
+									cA7 = newChunk;
+								} else if (i == 7) {
+									cA8 = newChunk;
+								} else if (i == 8) {
+									cA9 = newChunk;
+								} else if (i == 9) {
+									cA10 = newChunk;
+								} else if (i == 10) {
+									cA11 = newChunk;
+								} else if (i == 11) {
+									cA12 = newChunk;
+								} else if (i == 12) {
+									cA13 = newChunk;
+								} else if (i == 13) {
+									cA14 = newChunk;
+								} else if (i == 14) {
+									cA15 = newChunk;
+								} else if (i == 15) {
+									cA16 = newChunk;
+								} else if (i == 16) {
+									cA17 = newChunk;
+								} else if (i == 17) {
+									cA18 = newChunk;
+								} else if (i == 18) {
+									cA19 = newChunk;
+								} else if (i == 19) {
+									cA20 = newChunk;
+								} else if (i == 20) {
+									cA21 = newChunk;
 								}
 								i++;
-								// var enc = new TextDecoder();
-								// console.log(enc.decode(newChunk));
 							}
-							console.log(cA1);
-							console.log(cA6);
-							var blob = new Blob([cA1, cA2, cA3, cA4, cA5, cA6], {
-								type: "image/png"
+							var blob = new Blob([cA1, cA2, cA3, cA4, cA5, cA6, cA7, cA8, cA9, cA10, cA11, cA12, cA13, cA14, cA15, cA16, cA17, cA18, cA19, cA20, cA21], { // upto 215 KB file
+								type: file.type
 							});
 							console.log(blob);
 							saveData(blob, msg);
@@ -294,11 +315,6 @@
 						};
 
 						fileReader.readAsArrayBuffer(file);
-					} else {
-						// show image in chat box
-						var urlCreator = window.URL || window.webkitURL;
-						var imageUrl = urlCreator.createObjectURL(file);
-						document.querySelector("#image").src = imageUrl;
 					}
 				}
 			});
