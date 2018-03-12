@@ -371,11 +371,11 @@ var rsaPublicKey; // My public
 var rsaPrivateKey; // my private
 var rsaPublicKey_2; // Other users public key
 var aesKeyHash;
-var fileAESKey;
-var fileIv;
 var passA;
 var aesKab;
 var iv;
+var incoming_nickname;
+var current_nickname;
 
 $(function() {
  // would like to put protocol here but it cant find socketio. @TODO
