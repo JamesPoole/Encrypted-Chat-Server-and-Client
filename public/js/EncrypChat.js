@@ -284,23 +284,23 @@ function encryptAES(key, iv, data) {
     //Additional authentication data (optional)
     // additionalData: ArrayBuffer,
 
-     //Tag length (optional)
-     tagLength: 128, //can be 32, 64, 96, 104, 112, 120 or 128 (default)
-    },
-    key, //from generateKey or importKey above
-    data //ArrayBuffer of data you want to encrypt
-   )
-   .then(function(encrypted) {
-    //returns an ArrayBuffer containing the encrypted data
-    var data = new Uint8Array(encrypted);
-    return data;
-   })
-   .catch(function(err) {
-    console.error(err);
+    //Tag length (optional)
+    tagLength: 128, //can be 32, 64, 96, 104, 112, 120 or 128 (default)
+   },
+   key, //from generateKey or importKey above
+   data //ArrayBuffer of data you want to encrypt
+  )
+  .then(function(encrypted) {
+   //returns an ArrayBuffer containing the encrypted data
+   var data = new Uint8Array(encrypted);
+   return data;
+  })
+  .catch(function(err) {
+   console.error(err);
   });
- }
+}
 
-function decryptAES(key, data, iv) {
+function decryptAES(key, iv, data) {
  return window.crypto.subtle.decrypt({
     name: "AES-GCM",
     iv: iv, //The initialization vector you used to encrypt
@@ -366,7 +366,6 @@ async function decryptFileAES(key, data, iv) {
   });
 }
 
-
 // RSA Keys
 var rsaPublicKey; // My public
 var rsaPrivateKey; // my private
@@ -374,6 +373,9 @@ var rsaPublicKey_2; // Other users public key
 var aesKeyHash;
 var fileAESKey;
 var fileIv;
+var passA;
+var aesKab;
+var iv;
 
 $(function() {
  // would like to put protocol here but it cant find socketio. @TODO
