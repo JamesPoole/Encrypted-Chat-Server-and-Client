@@ -141,8 +141,7 @@ function receiveFile(socket) {
         fileReader.onload = async function() {
           var chunkSize = 10240;
           var enChunkSize = 10256;
-          var cA1, cA2, cA3, cA4, cA5, cA6, cA7, cA8, cA9, cA10, cA11, cA12, cA13, cA14, cA15, cA16, cA17, cA18, cA19, cA20, cA21; // upto 215 KB file
-          var i = 0;
+          var chunkList = [];
           var arrayBuffer = this.result;
           for (var sent = 0; sent < file.size; sent = sent + enChunkSize) {
             var encryptedChunk = await arrayBuffer.slice(sent, sent + enChunkSize);
@@ -153,52 +152,9 @@ function receiveFile(socket) {
             }, aesKab, encryptedChunk).catch(function(err) {
               console.error(err);
             });
-            if (i == 0) {
-              cA1 = newChunk;
-            } else if (i == 1) {
-              cA2 = newChunk;
-            } else if (i == 2) {
-              cA3 = newChunk;
-            } else if (i == 3) {
-              cA4 = newChunk;
-            } else if (i == 4) {
-              cA5 = newChunk;
-            } else if (i == 5) {
-              cA6 = newChunk;
-            } else if (i == 6) {
-              cA7 = newChunk;
-            } else if (i == 7) {
-              cA8 = newChunk;
-            } else if (i == 8) {
-              cA9 = newChunk;
-            } else if (i == 9) {
-              cA10 = newChunk;
-            } else if (i == 10) {
-              cA11 = newChunk;
-            } else if (i == 11) {
-              cA12 = newChunk;
-            } else if (i == 12) {
-              cA13 = newChunk;
-            } else if (i == 13) {
-              cA14 = newChunk;
-            } else if (i == 14) {
-              cA15 = newChunk;
-            } else if (i == 15) {
-              cA16 = newChunk;
-            } else if (i == 16) {
-              cA17 = newChunk;
-            } else if (i == 17) {
-              cA18 = newChunk;
-            } else if (i == 18) {
-              cA19 = newChunk;
-            } else if (i == 19) {
-              cA20 = newChunk;
-            } else if (i == 20) {
-              cA21 = newChunk;
-            }
-            i++;
+            chunkList.push(newChunk)
           }
-          var blob = new Blob([cA1, cA2, cA3, cA4, cA5, cA6, cA7, cA8, cA9, cA10, cA11, cA12, cA13, cA14, cA15, cA16, cA17, cA18, cA19, cA20, cA21], { // upto 215 KB file
+          var blob = new Blob(chunkList, {
             type: file.type
           });
           console.log("Decrypted file");
