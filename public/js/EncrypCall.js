@@ -112,18 +112,16 @@ function receiveFile(socket) {
 
     // File decryption and download starts here
     // Downloads the file to the user's computer
-    var saveData = (function() {
+    function saveData(data, fileName) {
       var a = document.createElement("a");
       document.body.appendChild(a);
       a.style = "display: none";
-      return function(data, fileName) {
-        url = window.URL.createObjectURL(data);
-        a.href = url;
-        a.download = fileName;
-        a.click();
-        window.URL.revokeObjectURL(url);
-      };
-    });
+      url = window.URL.createObjectURL(data);
+      a.href = url;
+      a.download = fileName;
+      a.click();
+      window.URL.revokeObjectURL(url);
+    };
 
     // Gets the encrypted file from server and puts it in a blob
     var xhr = new XMLHttpRequest();
