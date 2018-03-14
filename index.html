@@ -89,9 +89,9 @@
 	<script src="/socket.io/socket.io.js"></script>
 	<script src="socket.io-file-client.js"></script>
 	<script type="text/javascript" src="/js/jquery-1.11.1.js"></script>
-	<script type="text/javascript" src="/js/EncrypChat.js"></script>
-	<script type="text/javascript" src="/js/EncrypCall.js"></script>
-	<script type="text/javascript" src="/js/EncrypProtocol.js"></script>
+	<script type="text/javascript" src="/js/EncrypChat.js" defer></script>
+	<script type="text/javascript" src="/js/EncrypCall.js" defer></script>
+	<script type="text/javascript" src="/js/EncrypProtocol.js" defer></script>
 	<script>
 		$(document).ready(function() {
 			$("a.submit").click(function() {
@@ -127,7 +127,7 @@
 			receiveFile(socket);
 
 			// Once user selects file, upload it (encrypted if encrypt chat switch is
-		  // on) (async)
+			// on) (async)
 			uploadFile(socket, uploader, input);
 
 			// start off protocol by creating rsa public and private keys (async)
